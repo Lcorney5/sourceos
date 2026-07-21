@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import type { POStage } from "@/lib/supabase/database.types";
+import { logActivity } from "@/lib/activity-log";
 
 function toNullableDate(value: FormDataEntryValue | null) {
   if (!value || String(value).trim() === "") return null;
@@ -17,7 +18,7 @@ function toNumber(value: FormDataEntryValue | null, fallback = 0) {
 }
 
 export async function createPurchaseOrder(formData: FormData) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
   const supplierId = String(formData.get("supplier_id") ?? "");
@@ -47,6 +48,15 @@ export async function createPurchaseOrder(formData: FormData) {
     .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "created purchase order",
+    entityType: "purchase_order",
+    entityLabel: productName,
+    entityId: data.id,
+  });
 
   revalidatePath("/dashboard/purchase-orders");
   revalidatePath("/dashboard/timeline");
@@ -87,24 +97,42 @@ export async function updatePurchaseOrder(poId: string, formData: FormData) {
 }
 
 export async function setPurchaseOrderStage(poId: string, stage: POStage) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: po, error } = await supabase
     .from("purchase_orders")
     .update({ stage })
     .eq("id", poId)
-    .eq("workspace_id", workspace.id);
+    .eq("workspace_id", workspace.id)
+    .select("product_name")
+    .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: `moved PO to ${stage}`,
+    entityType: "purchase_order",
+    entityLabel: po?.product_name ?? null,
+    entityId: poId,
+  });
 
   revalidatePath("/dashboard/purchase-orders");
   revalidatePath("/dashboard/timeline");
 }
 
 export async function deletePurchaseOrder(poId: string) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
+
+  const { data: po } = await supabase
+    .from("purchase_orders")
+    .select("product_name")
+    .eq("id", poId)
+    .eq("workspace_id", workspace.id)
+    .single();
 
   const { error } = await supabase
     .from("purchase_orders")
@@ -113,6 +141,14 @@ export async function deletePurchaseOrder(poId: string) {
     .eq("workspace_id", workspace.id);
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "deleted purchase order",
+    entityType: "purchase_order",
+    entityLabel: po?.product_name ?? null,
+  });
 
   revalidatePath("/dashboard/purchase-orders");
   revalidatePath("/dashboard/timeline");

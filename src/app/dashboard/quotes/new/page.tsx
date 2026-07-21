@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button";
 import { createQuote } from "@/lib/actions/quotes";
 import { EmptyState } from "@/components/ui/table";
 import { LinkButton } from "@/components/ui/button";
+import { ProductNameDatalist } from "@/components/products/product-name-datalist";
 
 export default async function NewQuotePage() {
   const { workspace } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { data: suppliers } = await supabase
-    .from("suppliers")
-    .select("id, name")
-    .eq("workspace_id", workspace.id)
-    .order("name");
+  const [{ data: suppliers }, { data: products }] = await Promise.all([
+    supabase.from("suppliers").select("id, name").eq("workspace_id", workspace.id).order("name"),
+    supabase.from("products").select("name").eq("workspace_id", workspace.id).order("name"),
+  ]);
 
   return (
     <div>
@@ -40,7 +40,8 @@ export default async function NewQuotePage() {
             </Select>
           </Field>
           <Field label="Product Name" htmlFor="product_name">
-            <Input id="product_name" name="product_name" required />
+            <Input id="product_name" name="product_name" list="product-names" required />
+            <ProductNameDatalist products={products ?? []} />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Unit Price" htmlFor="unit_price">

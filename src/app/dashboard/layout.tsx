@@ -4,14 +4,23 @@ import { signOut } from "@/lib/auth/actions";
 import { StampBadge } from "@/components/ui/stamp-badge";
 
 const NAV_ITEMS = [
+  { href: "/dashboard/home", label: "Home" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/suppliers", label: "Suppliers" },
+  { href: "/dashboard/directory", label: "Directory" },
+  { href: "/dashboard/analytics", label: "Performance" },
   { href: "/dashboard/quotes", label: "Quotes" },
   { href: "/dashboard/samples", label: "Samples" },
-  { href: "/dashboard/purchase-orders", label: "Purchase Orders" },
+  { href: "/dashboard/products", label: "Products" },
+  { href: "/dashboard/purchase-orders", label: "Orders" },
+  { href: "/dashboard/finance", label: "Finance" },
+  { href: "/dashboard/activity-log", label: "Activity Log" },
   { href: "/dashboard/timeline", label: "Timeline" },
   { href: "/dashboard/calendar", label: "Calendar" },
+  { href: "/dashboard/production", label: "Production" },
   { href: "/dashboard/documents", label: "Documents" },
-  { href: "/dashboard/analytics", label: "Analytics" },
+  { href: "/dashboard/messages", label: "Messages" },
+  { href: "/dashboard/team", label: "Team" },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -19,9 +28,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="flex w-full flex-col border-b border-ink bg-paper-card md:w-56 md:border-b-0 md:border-r">
+      <aside className="flex w-full flex-col border-b border-ink bg-paper-card md:h-screen md:w-56 md:border-b-0 md:border-r">
         <div className="border-b border-ink px-4 py-4">
-          <Link href="/dashboard" className="font-display text-xl font-bold uppercase tracking-tight">
+          <Link href="/dashboard/home" className="font-display text-xl font-bold uppercase tracking-tight">
             Source<span className="text-rust">OS</span>
           </Link>
           <p className="mt-1 truncate font-mono text-xs uppercase tracking-wide text-muted">
@@ -31,7 +40,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {workspace.plan}
           </StampBadge>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 p-2">
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}

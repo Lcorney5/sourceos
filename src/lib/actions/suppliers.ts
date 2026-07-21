@@ -6,6 +6,7 @@ import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { normalizePhoneNumber } from "@/lib/phone";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
+import { logActivity } from "@/lib/activity-log";
 
 function toNullableInt(value: FormDataEntryValue | null) {
   if (!value || value === "") return null;
@@ -19,7 +20,7 @@ function toNullableString(value: FormDataEntryValue | null) {
 }
 
 export async function createSupplier(formData: FormData) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
   const name = String(formData.get("name") ?? "").trim();
@@ -55,6 +56,15 @@ export async function createSupplier(formData: FormData) {
 
   if (error) throw new Error(error.message);
 
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "created supplier",
+    entityType: "supplier",
+    entityLabel: name,
+    entityId: data.id,
+  });
+
   revalidatePath("/dashboard/suppliers");
   redirect(`/dashboard/suppliers/${data.id}`);
 }
@@ -87,8 +97,15 @@ export async function updateSupplier(supplierId: string, formData: FormData) {
 }
 
 export async function deleteSupplier(supplierId: string) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
+
+  const { data: supplier } = await supabase
+    .from("suppliers")
+    .select("name")
+    .eq("id", supplierId)
+    .eq("workspace_id", workspace.id)
+    .single();
 
   const { error } = await supabase
     .from("suppliers")
@@ -97,6 +114,14 @@ export async function deleteSupplier(supplierId: string) {
     .eq("workspace_id", workspace.id);
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "deleted supplier",
+    entityType: "supplier",
+    entityLabel: supplier?.name ?? null,
+  });
 
   revalidatePath("/dashboard/suppliers");
   redirect("/dashboard/suppliers");

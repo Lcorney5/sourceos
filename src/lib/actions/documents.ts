@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity-log";
 
 export async function uploadDocument(
   supplierId: string | null,
   purchaseOrderId: string | null,
   formData: FormData
 ) {
-  const { userId, workspace } = await requireWorkspace();
+  const { userId, workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
   const file = formData.get("file");
@@ -39,6 +40,14 @@ export async function uploadDocument(
     await supabase.storage.from("documents").remove([storagePath]);
     throw new Error(error.message);
   }
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "uploaded document",
+    entityType: "document",
+    entityLabel: file.name,
+  });
 
   if (supplierId) revalidatePath(`/dashboard/suppliers/${supplierId}`);
   if (purchaseOrderId) revalidatePath(`/dashboard/purchase-orders/${purchaseOrderId}`);

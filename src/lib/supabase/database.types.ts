@@ -265,6 +265,92 @@ export interface Database {
           },
         ];
       };
+      products: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          name: string;
+          sku: string | null;
+          category: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["products"]["Row"]> & {
+          workspace_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["products"]["Row"]>;
+        Relationships: [];
+      };
+      contacts: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          name: string;
+          company: string | null;
+          role: string | null;
+          email: string | null;
+          phone: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["contacts"]["Row"]> & {
+          workspace_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["contacts"]["Row"]>;
+        Relationships: [];
+      };
+      production_logs: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          purchase_order_id: string;
+          note: string;
+          photo_urls: string[];
+          created_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["production_logs"]["Row"]> & {
+          workspace_id: string;
+          purchase_order_id: string;
+          note: string;
+          created_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["production_logs"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "production_logs_purchase_order_id_fkey";
+            columns: ["purchase_order_id"];
+            isOneToOne: false;
+            referencedRelation: "purchase_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      activity_log: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          actor_id: string | null;
+          actor_label: string;
+          action: string;
+          entity_type: string;
+          entity_label: string | null;
+          entity_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["activity_log"]["Row"]> & {
+          workspace_id: string;
+          actor_label: string;
+          action: string;
+          entity_type: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["activity_log"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: {
       purchase_orders_with_status: {

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import type { QuoteStatus } from "@/lib/supabase/database.types";
+import { logActivity } from "@/lib/activity-log";
 
 function toNullableInt(value: FormDataEntryValue | null) {
   if (!value || value === "") return null;
@@ -18,7 +19,7 @@ function toNullableString(value: FormDataEntryValue | null) {
 }
 
 export async function createQuote(formData: FormData) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
   const supplierId = String(formData.get("supplier_id") ?? "");
@@ -29,19 +30,32 @@ export async function createQuote(formData: FormData) {
   if (!productName) throw new Error("Product name is required");
   if (Number.isNaN(unitPrice)) throw new Error("Unit price is required");
 
-  const { error } = await supabase.from("quotes").insert({
-    workspace_id: workspace.id,
-    supplier_id: supplierId,
-    product_name: productName,
-    unit_price: unitPrice,
-    currency: String(formData.get("currency") ?? "USD"),
-    moq: toNullableInt(formData.get("moq")),
-    lead_time_days: toNullableInt(formData.get("lead_time_days")),
-    date_received: String(formData.get("date_received") ?? new Date().toISOString().slice(0, 10)),
-    notes: toNullableString(formData.get("notes")),
-  });
+  const { data, error } = await supabase
+    .from("quotes")
+    .insert({
+      workspace_id: workspace.id,
+      supplier_id: supplierId,
+      product_name: productName,
+      unit_price: unitPrice,
+      currency: String(formData.get("currency") ?? "USD"),
+      moq: toNullableInt(formData.get("moq")),
+      lead_time_days: toNullableInt(formData.get("lead_time_days")),
+      date_received: String(formData.get("date_received") ?? new Date().toISOString().slice(0, 10)),
+      notes: toNullableString(formData.get("notes")),
+    })
+    .select("id")
+    .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "logged quote",
+    entityType: "quote",
+    entityLabel: productName,
+    entityId: data.id,
+  });
 
   revalidatePath("/dashboard/quotes");
   redirect("/dashboard/quotes");
@@ -78,23 +92,41 @@ export async function updateQuote(quoteId: string, formData: FormData) {
 }
 
 export async function setQuoteStatus(quoteId: string, status: QuoteStatus) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: quote, error } = await supabase
     .from("quotes")
     .update({ status })
     .eq("id", quoteId)
-    .eq("workspace_id", workspace.id);
+    .eq("workspace_id", workspace.id)
+    .select("product_name")
+    .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: `marked quote ${status}`,
+    entityType: "quote",
+    entityLabel: quote?.product_name ?? null,
+    entityId: quoteId,
+  });
 
   revalidatePath("/dashboard/quotes");
 }
 
 export async function deleteQuote(quoteId: string) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
+
+  const { data: quote } = await supabase
+    .from("quotes")
+    .select("product_name")
+    .eq("id", quoteId)
+    .eq("workspace_id", workspace.id)
+    .single();
 
   const { error } = await supabase
     .from("quotes")
@@ -103,6 +135,14 @@ export async function deleteQuote(quoteId: string) {
     .eq("workspace_id", workspace.id);
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "deleted quote",
+    entityType: "quote",
+    entityLabel: quote?.product_name ?? null,
+  });
 
   revalidatePath("/dashboard/quotes");
 }

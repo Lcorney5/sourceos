@@ -5,16 +5,16 @@ import { Field, Input, Select } from "@/components/ui/form";
 import { Button, LinkButton } from "@/components/ui/button";
 import { createPurchaseOrder } from "@/lib/actions/purchase-orders";
 import { EmptyState } from "@/components/ui/table";
+import { ProductNameDatalist } from "@/components/products/product-name-datalist";
 
 export default async function NewPurchaseOrderPage() {
   const { workspace } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { data: suppliers } = await supabase
-    .from("suppliers")
-    .select("id, name")
-    .eq("workspace_id", workspace.id)
-    .order("name");
+  const [{ data: suppliers }, { data: products }] = await Promise.all([
+    supabase.from("suppliers").select("id, name").eq("workspace_id", workspace.id).order("name"),
+    supabase.from("products").select("name").eq("workspace_id", workspace.id).order("name"),
+  ]);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -41,7 +41,8 @@ export default async function NewPurchaseOrderPage() {
             </Select>
           </Field>
           <Field label="Product Name" htmlFor="product_name">
-            <Input id="product_name" name="product_name" required />
+            <Input id="product_name" name="product_name" list="product-names" required />
+            <ProductNameDatalist products={products ?? []} />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Total Amount" htmlFor="total_amount">

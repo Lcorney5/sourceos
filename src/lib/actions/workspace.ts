@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
+import { logActivity } from "@/lib/activity-log";
 
 async function requireOwner() {
   const context = await requireWorkspace();
@@ -14,7 +15,7 @@ async function requireOwner() {
 }
 
 export async function inviteMember(formData: FormData) {
-  const { workspace, userId } = await requireOwner();
+  const { workspace, userId, profile } = await requireOwner();
   const supabase = await createClient();
 
   const email = String(formData.get("email") ?? "")
@@ -49,7 +50,16 @@ export async function inviteMember(formData: FormData) {
 
   if (error) throw new Error(error.message);
 
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "invited member",
+    entityType: "member",
+    entityLabel: email,
+  });
+
   revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/team");
 }
 
 export async function revokeInvite(inviteId: string) {
@@ -68,9 +78,16 @@ export async function revokeInvite(inviteId: string) {
 }
 
 export async function removeMember(profileId: string) {
-  const { workspace, userId } = await requireOwner();
+  const { workspace, userId, profile } = await requireOwner();
   if (profileId === userId) throw new Error("Owners cannot remove themselves");
   const supabase = await createClient();
+
+  const { data: removed } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", profileId)
+    .eq("workspace_id", workspace.id)
+    .single();
 
   const { error } = await supabase
     .from("profiles")
@@ -80,5 +97,14 @@ export async function removeMember(profileId: string) {
 
   if (error) throw new Error(error.message);
 
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "removed member",
+    entityType: "member",
+    entityLabel: removed?.email ?? null,
+  });
+
   revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/team");
 }

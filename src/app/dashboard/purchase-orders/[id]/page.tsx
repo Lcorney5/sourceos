@@ -11,6 +11,7 @@ import { PO_STAGES, isPurchaseOrderOverdue } from "@/lib/purchase-orders";
 import { updatePurchaseOrder, deletePurchaseOrder } from "@/lib/actions/purchase-orders";
 import { DocumentsSection } from "@/components/documents/documents-section";
 import { withSignedUrls } from "@/lib/documents";
+import { ProductionLog } from "@/components/purchase-orders/production-log";
 
 export default async function PurchaseOrderDetailPage({
   params,
@@ -36,6 +37,12 @@ export default async function PurchaseOrderDetailPage({
     .eq("purchase_order_id", po.id)
     .order("created_at", { ascending: false });
   const documentsWithUrls = await withSignedUrls(supabase, documents ?? []);
+
+  const { data: productionLogEntries } = await supabase
+    .from("production_logs")
+    .select("*")
+    .eq("purchase_order_id", po.id)
+    .order("created_at", { ascending: false });
 
   const updateWithId = updatePurchaseOrder.bind(null, po.id);
   const deleteWithId = deletePurchaseOrder.bind(null, po.id);
@@ -179,14 +186,25 @@ export default async function PurchaseOrderDetailPage({
         </CardBody>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <DocumentsSection documents={documentsWithUrls} purchaseOrderId={po.id} />
-        </CardBody>
-      </Card>
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Production Log</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <ProductionLog purchaseOrderId={po.id} entries={productionLogEntries ?? []} />
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Documents</CardTitle>
+          </CardHeader>
+          <CardBody>
+            <DocumentsSection documents={documentsWithUrls} purchaseOrderId={po.id} />
+          </CardBody>
+        </Card>
+      </div>
       </div>
     </div>
   );

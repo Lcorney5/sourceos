@@ -5,16 +5,16 @@ import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { Button, LinkButton } from "@/components/ui/button";
 import { createSample } from "@/lib/actions/samples";
 import { EmptyState } from "@/components/ui/table";
+import { ProductNameDatalist } from "@/components/products/product-name-datalist";
 
 export default async function NewSamplePage() {
   const { workspace } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { data: suppliers } = await supabase
-    .from("suppliers")
-    .select("id, name")
-    .eq("workspace_id", workspace.id)
-    .order("name");
+  const [{ data: suppliers }, { data: products }] = await Promise.all([
+    supabase.from("suppliers").select("id, name").eq("workspace_id", workspace.id).order("name"),
+    supabase.from("products").select("name").eq("workspace_id", workspace.id).order("name"),
+  ]);
 
   return (
     <div>
@@ -39,7 +39,8 @@ export default async function NewSamplePage() {
             </Select>
           </Field>
           <Field label="Product Name" htmlFor="product_name">
-            <Input id="product_name" name="product_name" required />
+            <Input id="product_name" name="product_name" list="product-names" required />
+            <ProductNameDatalist products={products ?? []} />
           </Field>
           <Field label="Revision" htmlFor="revision">
             <Input id="revision" name="revision" type="number" min={1} defaultValue={1} />

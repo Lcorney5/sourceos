@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import type { SampleStatus } from "@/lib/supabase/database.types";
+import { logActivity } from "@/lib/activity-log";
 
 function toNullableString(value: FormDataEntryValue | null) {
   if (!value || String(value).trim() === "") return null;
@@ -20,7 +21,7 @@ function parsePhotoUrls(value: FormDataEntryValue | null) {
 }
 
 export async function createSample(formData: FormData) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
   const supplierId = String(formData.get("supplier_id") ?? "");
@@ -43,6 +44,15 @@ export async function createSample(formData: FormData) {
     .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "requested sample",
+    entityType: "sample",
+    entityLabel: productName,
+    entityId: data.id,
+  });
 
   revalidatePath("/dashboard/samples");
   redirect(`/dashboard/samples/${data.id}`);
@@ -75,16 +85,27 @@ export async function updateSample(sampleId: string, formData: FormData) {
 }
 
 export async function setSampleStatus(sampleId: string, status: SampleStatus) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data: sample, error } = await supabase
     .from("samples")
     .update({ status, date_updated: new Date().toISOString() })
     .eq("id", sampleId)
-    .eq("workspace_id", workspace.id);
+    .eq("workspace_id", workspace.id)
+    .select("product_name")
+    .single();
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: `marked sample ${status}`,
+    entityType: "sample",
+    entityLabel: sample?.product_name ?? null,
+    entityId: sampleId,
+  });
 
   revalidatePath("/dashboard/samples");
 }
@@ -119,8 +140,15 @@ export async function requestNextRevision(sampleId: string) {
 }
 
 export async function deleteSample(sampleId: string) {
-  const { workspace } = await requireWorkspace();
+  const { workspace, profile } = await requireWorkspace();
   const supabase = await createClient();
+
+  const { data: sample } = await supabase
+    .from("samples")
+    .select("product_name")
+    .eq("id", sampleId)
+    .eq("workspace_id", workspace.id)
+    .single();
 
   const { error } = await supabase
     .from("samples")
@@ -129,6 +157,14 @@ export async function deleteSample(sampleId: string) {
     .eq("workspace_id", workspace.id);
 
   if (error) throw new Error(error.message);
+
+  await logActivity(supabase, {
+    workspaceId: workspace.id,
+    actorLabel: profile.name ?? profile.email,
+    action: "deleted sample",
+    entityType: "sample",
+    entityLabel: sample?.product_name ?? null,
+  });
 
   revalidatePath("/dashboard/samples");
   redirect("/dashboard/samples");
