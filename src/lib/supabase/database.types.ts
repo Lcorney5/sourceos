@@ -228,6 +228,43 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["waitlist_signups"]["Row"]>;
         Relationships: [];
       };
+      documents: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          supplier_id: string | null;
+          purchase_order_id: string | null;
+          file_name: string;
+          storage_path: string;
+          file_size: number | null;
+          content_type: string | null;
+          uploaded_by: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["documents"]["Row"]> & {
+          workspace_id: string;
+          file_name: string;
+          storage_path: string;
+          uploaded_by: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["documents"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "documents_supplier_id_fkey";
+            columns: ["supplier_id"];
+            isOneToOne: false;
+            referencedRelation: "suppliers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documents_purchase_order_id_fkey";
+            columns: ["purchase_order_id"];
+            isOneToOne: false;
+            referencedRelation: "purchase_orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       purchase_orders_with_status: {

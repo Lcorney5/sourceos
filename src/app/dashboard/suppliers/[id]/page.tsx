@@ -12,6 +12,9 @@ import {
   deleteSupplier,
   addCommunicationLogEntry,
 } from "@/lib/actions/suppliers";
+import { DocumentsSection } from "@/components/documents/documents-section";
+import { withSignedUrls } from "@/lib/documents";
+import { WhatsappThread } from "@/components/suppliers/whatsapp-thread";
 
 export default async function SupplierDetailPage({
   params,
@@ -30,6 +33,19 @@ export default async function SupplierDetailPage({
     .single();
 
   if (!supplier) notFound();
+
+  const { data: documents } = await supabase
+    .from("documents")
+    .select("*")
+    .eq("supplier_id", supplier.id)
+    .order("created_at", { ascending: false });
+  const documentsWithUrls = await withSignedUrls(supabase, documents ?? []);
+
+  const { data: whatsappMessages } = await supabase
+    .from("whatsapp_messages")
+    .select("*")
+    .eq("supplier_id", supplier.id)
+    .order("timestamp", { ascending: true });
 
   const updateSupplierWithId = updateSupplier.bind(null, supplier.id);
   const deleteSupplierWithId = deleteSupplier.bind(null, supplier.id);
@@ -73,6 +89,19 @@ export default async function SupplierDetailPage({
 
           <Card>
             <CardHeader>
+              <CardTitle>WhatsApp Messages</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <WhatsappThread
+                supplierId={supplier.id}
+                connected={supplier.whatsapp_connected}
+                messages={whatsappMessages ?? []}
+              />
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Communication Log</CardTitle>
             </CardHeader>
             <CardBody>
@@ -108,6 +137,15 @@ export default async function SupplierDetailPage({
                   ))}
                 </ul>
               )}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <DocumentsSection documents={documentsWithUrls} supplierId={supplier.id} />
             </CardBody>
           </Card>
         </div>

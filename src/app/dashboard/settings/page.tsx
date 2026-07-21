@@ -5,6 +5,8 @@ import { Field, Input } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { StampBadge } from "@/components/ui/stamp-badge";
 import { InlineActionButton } from "@/components/settings/inline-action-button";
+import { UsageMeter } from "@/components/ui/usage-meter";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { inviteMember, revokeInvite, removeMember } from "@/lib/actions/workspace";
 import Link from "next/link";
 
@@ -34,8 +36,13 @@ export default async function SettingsPage() {
       <PageHeader eyebrow="Workspace" title="Settings" />
       <div className="flex flex-col gap-6">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>Members</CardTitle>
+            <UsageMeter
+              label="members used"
+              used={(members?.length ?? 0) + (invites?.length ?? 0)}
+              limit={PLAN_LIMITS[workspace.plan].members}
+            />
           </CardHeader>
           <CardBody>
             <ul className="mb-4 flex flex-col divide-y divide-ink/20">

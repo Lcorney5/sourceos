@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 
 async function requireOwner() {
   const context = await requireWorkspace();
@@ -20,6 +21,25 @@ export async function inviteMember(formData: FormData) {
     .trim()
     .toLowerCase();
   if (!email) throw new Error("Email is required");
+
+  const memberLimit = PLAN_LIMITS[workspace.plan].members;
+  if (memberLimit !== null) {
+    const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspace.id),
+      supabase
+        .from("workspace_invites")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspace.id),
+    ]);
+    if ((memberCount ?? 0) + (inviteCount ?? 0) >= memberLimit) {
+      throw new Error(
+        `Your ${workspace.plan} plan is limited to ${memberLimit} members. Upgrade to invite more.`
+      );
+    }
+  }
 
   const { error } = await supabase.from("workspace_invites").insert({
     workspace_id: workspace.id,

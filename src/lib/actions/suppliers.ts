@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { normalizePhoneNumber } from "@/lib/phone";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 
 function toNullableInt(value: FormDataEntryValue | null) {
   if (!value || value === "") return null;
@@ -23,6 +24,19 @@ export async function createSupplier(formData: FormData) {
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) throw new Error("Supplier name is required");
+
+  const supplierLimit = PLAN_LIMITS[workspace.plan].suppliers;
+  if (supplierLimit !== null) {
+    const { count } = await supabase
+      .from("suppliers")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspace.id);
+    if ((count ?? 0) >= supplierLimit) {
+      throw new Error(
+        `Your ${workspace.plan} plan is limited to ${supplierLimit} suppliers. Upgrade to add more.`
+      );
+    }
+  }
 
   const { data, error } = await supabase
     .from("suppliers")

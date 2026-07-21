@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { StampBadge } from "@/components/ui/stamp-badge";
 import { Table, Thead, Th, Tr, Td, EmptyState } from "@/components/ui/table";
+import { UsageMeter } from "@/components/ui/usage-meter";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import Link from "next/link";
 
 export default async function SuppliersPage() {
@@ -23,6 +25,13 @@ export default async function SuppliersPage() {
         title="Suppliers"
         actions={<LinkButton href="/dashboard/suppliers/new">+ Add Supplier</LinkButton>}
       />
+      <div className="-mt-4 mb-4">
+        <UsageMeter
+          label="suppliers used"
+          used={suppliers?.length ?? 0}
+          limit={PLAN_LIMITS[workspace.plan].suppliers}
+        />
+      </div>
       {!suppliers?.length ? (
         <EmptyState
           message="No suppliers yet."

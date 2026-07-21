@@ -9,6 +9,8 @@ import { POStageBadge, OverdueBadge } from "@/components/ui/stamp-badge";
 import { StageProgressBar } from "@/components/purchase-orders/stage-progress-bar";
 import { PO_STAGES, isPurchaseOrderOverdue } from "@/lib/purchase-orders";
 import { updatePurchaseOrder, deletePurchaseOrder } from "@/lib/actions/purchase-orders";
+import { DocumentsSection } from "@/components/documents/documents-section";
+import { withSignedUrls } from "@/lib/documents";
 
 export default async function PurchaseOrderDetailPage({
   params,
@@ -27,6 +29,13 @@ export default async function PurchaseOrderDetailPage({
     .single();
 
   if (!po) notFound();
+
+  const { data: documents } = await supabase
+    .from("documents")
+    .select("*")
+    .eq("purchase_order_id", po.id)
+    .order("created_at", { ascending: false });
+  const documentsWithUrls = await withSignedUrls(supabase, documents ?? []);
 
   const updateWithId = updatePurchaseOrder.bind(null, po.id);
   const deleteWithId = deletePurchaseOrder.bind(null, po.id);
@@ -53,12 +62,13 @@ export default async function PurchaseOrderDetailPage({
         <StageProgressBar stage={po.stage} />
       </div>
 
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
       <Card>
         <CardHeader>
           <CardTitle>Order Details</CardTitle>
         </CardHeader>
         <CardBody>
-          <form action={updateWithId} className="flex max-w-2xl flex-col gap-4">
+          <form action={updateWithId} className="flex flex-col gap-4">
             <Field label="Product Name" htmlFor="product_name">
               <Input id="product_name" name="product_name" required defaultValue={po.product_name} />
             </Field>
@@ -168,6 +178,16 @@ export default async function PurchaseOrderDetailPage({
           </form>
         </CardBody>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Documents</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <DocumentsSection documents={documentsWithUrls} purchaseOrderId={po.id} />
+        </CardBody>
+      </Card>
+      </div>
     </div>
   );
 }
