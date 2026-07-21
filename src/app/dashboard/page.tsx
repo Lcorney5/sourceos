@@ -12,7 +12,7 @@ export default async function DashboardOverviewPage() {
     supabase.from("quotes").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase
       .from("purchase_orders")
-      .select("id", { count: "exact", head: true })
+      .select("id, total_amount, currency")
       .neq("stage", "delivered"),
     supabase
       .from("purchase_orders_with_status")
@@ -20,13 +20,21 @@ export default async function DashboardOverviewPage() {
       .eq("is_overdue", true),
   ]);
 
+  const activePOList = activePOs.data ?? [];
+  const orderVolume = activePOList.reduce((sum, po) => sum + po.total_amount, 0);
+  const volumeCurrency = activePOList[0]?.currency ?? "USD";
+
   const stats = [
-    { label: "Suppliers", value: suppliers.count ?? 0, href: "/dashboard/suppliers" },
-    { label: "Pending Quotes", value: pendingQuotes.count ?? 0, href: "/dashboard/quotes" },
-    { label: "Active POs", value: activePOs.count ?? 0, href: "/dashboard/purchase-orders" },
+    { label: "Active Suppliers", value: String(suppliers.count ?? 0), href: "/dashboard/suppliers" },
+    { label: "Pending Quotes", value: String(pendingQuotes.count ?? 0), href: "/dashboard/quotes" },
+    {
+      label: "Current Order Volume",
+      value: `${volumeCurrency} ${orderVolume.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      href: "/dashboard/purchase-orders",
+    },
     {
       label: "Past Due POs",
-      value: overduePOs.count ?? 0,
+      value: String(overduePOs.count ?? 0),
       href: "/dashboard/purchase-orders",
       alert: (overduePOs.count ?? 0) > 0,
     },
@@ -44,7 +52,7 @@ export default async function DashboardOverviewPage() {
                   {stat.label}
                 </p>
                 <p
-                  className={`mt-2 font-display text-4xl font-bold ${
+                  className={`mt-2 truncate font-display text-3xl font-bold ${
                     stat.alert ? "text-rust" : "text-ink"
                   }`}
                 >
