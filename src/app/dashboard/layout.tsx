@@ -2,26 +2,7 @@ import Link from "next/link";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { signOut } from "@/lib/auth/actions";
 import { StampBadge } from "@/components/ui/stamp-badge";
-
-const NAV_ITEMS = [
-  { href: "/dashboard/home", label: "Home" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/suppliers", label: "Suppliers" },
-  { href: "/dashboard/directory", label: "Directory" },
-  { href: "/dashboard/analytics", label: "Performance" },
-  { href: "/dashboard/quotes", label: "Quotes" },
-  { href: "/dashboard/samples", label: "Samples" },
-  { href: "/dashboard/products", label: "Products" },
-  { href: "/dashboard/purchase-orders", label: "Orders" },
-  { href: "/dashboard/finance", label: "Finance" },
-  { href: "/dashboard/activity-log", label: "Activity Log" },
-  { href: "/dashboard/timeline", label: "Timeline" },
-  { href: "/dashboard/calendar", label: "Calendar" },
-  { href: "/dashboard/production", label: "Production" },
-  { href: "/dashboard/documents", label: "Documents" },
-  { href: "/dashboard/messages", label: "Messages" },
-  { href: "/dashboard/team", label: "Team" },
-];
+import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { profile, workspace } = await requireWorkspace();
@@ -40,17 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {workspace.plan}
           </StampBadge>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="border border-transparent px-3 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-ink hover:border-ink"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <SidebarNav />
         <div className="border-t border-ink p-2">
           <Link
             href="/dashboard/settings"
