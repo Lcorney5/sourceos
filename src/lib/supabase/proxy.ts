@@ -49,6 +49,13 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // API routes (webhooks, etc.) authenticate themselves — e.g. Stripe/Twilio
+  // verify a request signature instead of a user session — so they must
+  // never be redirected to /login.
+  if (pathname.startsWith("/api/")) {
+    return response;
+  }
+
   if (!user && !isPublicPath(pathname)) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("redirect", pathname);
