@@ -30,8 +30,8 @@ npm install
 
 ### 3. Set up Stripe
 
-1. Create three recurring Prices in the Stripe Dashboard (Starter $29/mo, Growth $79/mo,
-   Agency $199/mo) and put their price IDs in `NEXT_PUBLIC_STRIPE_PRICE_*` in `.env.local`.
+1. Create three recurring Prices in the Stripe Dashboard (Starter $15/mo, Growth $60/mo,
+   Agency $130/mo) and put their price IDs in `NEXT_PUBLIC_STRIPE_PRICE_*` in `.env.local`.
 2. Copy your secret key into `STRIPE_SECRET_KEY`.
 3. Add a webhook endpoint pointing at `<your-domain>/api/stripe/webhook` listening for
    `checkout.session.completed`, `customer.subscription.updated`, and

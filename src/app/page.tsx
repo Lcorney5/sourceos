@@ -43,21 +43,21 @@ const FEATURES = [
 const PRICING = [
   {
     name: "Starter",
-    price: "$29",
+    price: "$15",
     blurb: "1 user, up to 3 active products",
     features: ["Supplier & quote tracking"],
     featured: false,
   },
   {
     name: "Growth",
-    price: "$79",
+    price: "$60",
     blurb: "Up to 3 users, unlimited products",
     features: ["Full sample & PO tracking", "Timeline view", "AI quote parsing"],
     featured: true,
   },
   {
     name: "Agency",
-    price: "$199",
+    price: "$130",
     blurb: "Multi-client workspaces, unlimited users",
     features: ["Everything in Growth", "AI negotiation-assist", "Supplier risk flagging"],
     featured: false,
