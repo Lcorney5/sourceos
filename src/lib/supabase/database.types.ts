@@ -7,6 +7,7 @@ export type POStage = "quoting" | "sampling" | "deposit_paid" | "in_production" 
 export type WorkspacePlan = "starter" | "growth" | "agency";
 export type SubscriptionStatus = "inactive" | "trialing" | "active" | "past_due" | "canceled";
 export type WorkspaceRole = "owner" | "member";
+export type FeedbackType = "feedback" | "bug" | "feature";
 
 export interface CommunicationLogEntry {
   date: string;
@@ -283,6 +284,26 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["products"]["Row"]>;
         Relationships: [];
       };
+      feedback_submissions: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          submitted_by: string;
+          type: FeedbackType;
+          subject: string;
+          description: string;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["feedback_submissions"]["Row"]> & {
+          workspace_id: string;
+          submitted_by: string;
+          type: FeedbackType;
+          subject: string;
+          description: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["feedback_submissions"]["Row"]>;
+        Relationships: [];
+      };
       contacts: {
         Row: {
           id: string;
@@ -367,6 +388,10 @@ export interface Database {
       };
       accept_workspace_invite: {
         Args: { invite_email: string };
+        Returns: string;
+      };
+      join_workspace_by_id: {
+        Args: { target_workspace_id: string };
         Returns: string;
       };
     };

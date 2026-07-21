@@ -4,8 +4,9 @@ import { PageHeader } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { Table, Thead, Th, Tr, Td, EmptyState } from "@/components/ui/table";
 import { POStageSelect } from "@/components/purchase-orders/po-stage-select";
+import { StageSteps } from "@/components/purchase-orders/stage-steps";
 import { OverdueBadge } from "@/components/ui/stamp-badge";
-import { isPurchaseOrderOverdue } from "@/lib/purchase-orders";
+import { isPurchaseOrderOverdue, poRef } from "@/lib/purchase-orders";
 import Link from "next/link";
 
 export default async function PurchaseOrdersPage() {
@@ -18,14 +19,17 @@ export default async function PurchaseOrdersPage() {
     .eq("workspace_id", workspace.id)
     .order("order_date", { ascending: false });
 
+  const pos = purchaseOrders ?? [];
+  const overdueCount = pos.filter(isPurchaseOrderOverdue).length;
+
   return (
     <div>
       <PageHeader
-        eyebrow="Manifest"
         title="Purchase Orders"
-        actions={<LinkButton href="/dashboard/purchase-orders/new">+ New PO</LinkButton>}
+        subtitle={`${pos.length} orders · ${overdueCount} overdue`}
+        actions={<LinkButton href="/dashboard/purchase-orders/new">+ New Order</LinkButton>}
       />
-      {!purchaseOrders?.length ? (
+      {!pos.length ? (
         <EmptyState
           message="No purchase orders yet."
           action={<LinkButton href="/dashboard/purchase-orders/new">Create your first PO</LinkButton>}
@@ -34,31 +38,46 @@ export default async function PurchaseOrdersPage() {
         <Table>
           <Thead>
             <tr>
-              <Th>Product</Th>
+              <Th>Ref</Th>
               <Th>Supplier</Th>
+              <Th>Product</Th>
               <Th>Total</Th>
               <Th>Stage</Th>
-              <Th>Target Delivery</Th>
-              <Th></Th>
+              <Th>Deposit</Th>
+              <Th>Balance</Th>
+              <Th>Status</Th>
             </tr>
           </Thead>
           <tbody>
-            {purchaseOrders.map((po) => (
+            {pos.map((po) => (
               <Tr key={po.id} className={isPurchaseOrderOverdue(po) ? "bg-rust/5" : undefined}>
-                <Td className="font-semibold">
+                <Td className="font-mono text-xs text-muted">{poRef(po.id)}</Td>
+                <Td className="font-semibold">{po.suppliers?.name ?? "—"}</Td>
+                <Td>
                   <Link href={`/dashboard/purchase-orders/${po.id}`} className="hover:text-rust">
                     {po.product_name}
                   </Link>
                 </Td>
-                <Td>{po.suppliers?.name ?? "—"}</Td>
                 <Td className="font-mono">
                   {po.currency} {po.total_amount.toFixed(2)}
                 </Td>
                 <Td>
                   <POStageSelect poId={po.id} stage={po.stage} />
                 </Td>
-                <Td className="font-mono">{po.target_delivery_date ?? "—"}</Td>
-                <Td>{isPurchaseOrderOverdue(po) && <OverdueBadge />}</Td>
+                <Td className="font-mono">
+                  {po.deposit_amount > 0 ? po.deposit_amount.toFixed(2) : "—"}
+                </Td>
+                <Td className="font-mono">
+                  {po.balance_amount > 0 ? po.balance_amount.toFixed(2) : "—"}
+                </Td>
+                <Td className="min-w-[9rem]">
+                  <StageSteps stage={po.stage} showLabels={false} />
+                  {isPurchaseOrderOverdue(po) && (
+                    <div className="mt-1">
+                      <OverdueBadge />
+                    </div>
+                  )}
+                </Td>
               </Tr>
             ))}
           </tbody>

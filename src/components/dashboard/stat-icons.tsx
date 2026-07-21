@@ -49,3 +49,31 @@ export function OrderVolumeIcon({ size }: { size?: number }) {
     </IconBase>
   );
 }
+
+export function DollarIcon({ size }: { size?: number }) {
+  return (
+    <IconBase size={size}>
+      <path d="M10 3v14" />
+      <path d="M13 6.5c0-1.4-1.3-2.5-3-2.5S7 5.1 7 6.5c0 3 6 1.3 6 4.5 0 1.4-1.3 2.5-3 2.5s-3-1.1-3-2.5" />
+    </IconBase>
+  );
+}
+
+export function WalletIcon({ size }: { size?: number }) {
+  return (
+    <IconBase size={size}>
+      <path d="M2.5 6a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V6Z" />
+      <path d="M2.5 8.5h13.5" />
+      <circle cx="13.5" cy="11.5" r="1" />
+    </IconBase>
+  );
+}
+
+export function TrendDownIcon({ size }: { size?: number }) {
+  return (
+    <IconBase size={size}>
+      <path d="M2.5 5 7.5 11l3-3 6.5 7" />
+      <path d="M13.5 15.5H17V12" />
+    </IconBase>
+  );
+}

@@ -91,6 +91,20 @@ export function POStageBadge({ stage }: { stage: string }) {
   );
 }
 
+const FEEDBACK_TYPE_TONE: Record<string, StampTone> = {
+  feedback: "steel",
+  bug: "rust",
+  feature: "amber",
+};
+
+export function FeedbackTypeBadge({ type }: { type: string }) {
+  return (
+    <StampBadge tone={FEEDBACK_TYPE_TONE[type] ?? "ink"}>
+      {type === "bug" ? "BUG REPORT" : type === "feature" ? "FEATURE REQUEST" : "FEEDBACK"}
+    </StampBadge>
+  );
+}
+
 export function OverdueBadge() {
   return (
     <StampBadge tone="rust" className="animate-none">

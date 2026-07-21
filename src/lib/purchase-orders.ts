@@ -2,6 +2,10 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type PurchaseOrder = Database["public"]["Tables"]["purchase_orders"]["Row"];
 
+export function poRef(id: string): string {
+  return `#${id.slice(0, 6).toUpperCase()}`;
+}
+
 // Mirrors the is_overdue logic in the purchase_orders_with_status SQL view.
 export function isPurchaseOrderOverdue(po: PurchaseOrder): boolean {
   if (po.stage === "delivered") return false;

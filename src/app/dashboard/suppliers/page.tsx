@@ -2,11 +2,10 @@ import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
-import { StampBadge } from "@/components/ui/stamp-badge";
-import { Table, Thead, Th, Tr, Td, EmptyState } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/table";
 import { UsageMeter } from "@/components/ui/usage-meter";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
-import Link from "next/link";
+import { SupplierDirectory } from "@/components/suppliers/supplier-directory";
 
 export default async function SuppliersPage() {
   const { workspace } = await requireWorkspace();
@@ -18,62 +17,29 @@ export default async function SuppliersPage() {
     .eq("workspace_id", workspace.id)
     .order("name");
 
+  const list = suppliers ?? [];
+
   return (
     <div>
       <PageHeader
-        eyebrow="Manifest"
-        title="Suppliers"
+        title="Supplier Directory"
+        subtitle={`${list.length} suppliers · quick contact reference`}
         actions={<LinkButton href="/dashboard/suppliers/new">+ Add Supplier</LinkButton>}
       />
-      <div className="-mt-4 mb-4">
+      <div className="mb-4">
         <UsageMeter
           label="suppliers used"
-          used={suppliers?.length ?? 0}
+          used={list.length}
           limit={PLAN_LIMITS[workspace.plan].suppliers}
         />
       </div>
-      {!suppliers?.length ? (
+      {!list.length ? (
         <EmptyState
           message="No suppliers yet."
           action={<LinkButton href="/dashboard/suppliers/new">Add your first supplier</LinkButton>}
         />
       ) : (
-        <Table>
-          <Thead>
-            <tr>
-              <Th>Name</Th>
-              <Th>Location</Th>
-              <Th>MOQ</Th>
-              <Th>Lead Time</Th>
-              <Th>Contact</Th>
-              <Th>WhatsApp</Th>
-            </tr>
-          </Thead>
-          <tbody>
-            {suppliers.map((supplier) => (
-              <Tr key={supplier.id}>
-                <Td className="font-semibold">
-                  <Link href={`/dashboard/suppliers/${supplier.id}`} className="hover:text-rust">
-                    {supplier.name}
-                  </Link>
-                </Td>
-                <Td>{supplier.location ?? "—"}</Td>
-                <Td className="font-mono">{supplier.moq ?? "—"}</Td>
-                <Td className="font-mono">
-                  {supplier.lead_time_days ? `${supplier.lead_time_days}d` : "—"}
-                </Td>
-                <Td>{supplier.contact_email ?? supplier.contact_phone ?? "—"}</Td>
-                <Td>
-                  {supplier.whatsapp_connected ? (
-                    <StampBadge tone="steel">Connected</StampBadge>
-                  ) : (
-                    <span className="font-mono text-xs text-muted">—</span>
-                  )}
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
+        <SupplierDirectory suppliers={list} />
       )}
     </div>
   );

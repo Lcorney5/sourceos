@@ -1,10 +1,12 @@
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
-import { Field, Input } from "@/components/ui/form";
+import { Field, Input, Select } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { StampBadge } from "@/components/ui/stamp-badge";
+import { CrownIcon } from "@/components/ui/icons";
 import { InlineActionButton } from "@/components/settings/inline-action-button";
+import { CopyWorkspaceId } from "@/components/team/copy-workspace-id";
 import { UsageMeter } from "@/components/ui/usage-meter";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { inviteMember, revokeInvite, removeMember } from "@/lib/actions/workspace";
@@ -25,25 +27,38 @@ export default async function TeamPage() {
       : Promise.resolve({ data: [] }),
   ]);
 
+  const memberCount = members?.length ?? 0;
+
   return (
     <div>
-      <PageHeader eyebrow="Workspace" title="Team" />
+      <PageHeader
+        title="Team Management"
+        subtitle={`${memberCount} member${memberCount === 1 ? "" : "s"} in ${workspace.plan}`}
+      />
+
+      <div className="mb-6">
+        <CopyWorkspaceId workspaceId={workspace.id} />
+      </div>
+
       <Card>
         <CardHeader className="flex items-center justify-between">
           <CardTitle>Members</CardTitle>
           <UsageMeter
             label="members used"
-            used={(members?.length ?? 0) + (invites?.length ?? 0)}
+            used={memberCount + (invites?.length ?? 0)}
             limit={PLAN_LIMITS[workspace.plan].members}
           />
         </CardHeader>
         <CardBody>
-          <ul className="mb-4 flex flex-col divide-y divide-ink/20">
+          <ul className="mb-6 flex flex-col divide-y divide-ink/20 border border-ink">
             {members?.map((member) => (
-              <li key={member.id} className="flex items-center justify-between py-2">
-                <div>
-                  <p className="text-sm text-ink">{member.name ?? member.email}</p>
-                  <p className="font-mono text-xs text-muted">{member.email}</p>
+              <li key={member.id} className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3">
+                  {member.role === "owner" && <CrownIcon size={16} />}
+                  <div>
+                    <p className="text-sm text-ink">{member.name ?? member.email}</p>
+                    <p className="font-mono text-xs text-muted">{member.email}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <StampBadge tone={member.role === "owner" ? "amber" : "ink"}>
@@ -63,13 +78,28 @@ export default async function TeamPage() {
 
           {isOwner && (
             <>
+              <p className="mb-2 font-display text-lg font-bold uppercase tracking-tight">
+                Invite Member
+              </p>
+              <form action={inviteMember} className="mb-6 flex items-end gap-3">
+                <Field label="Email Address" htmlFor="invite-email">
+                  <Input id="invite-email" name="email" type="email" required placeholder="teammate@company.com" />
+                </Field>
+                <Field label="Role" htmlFor="invite-role">
+                  <Select id="invite-role" name="role" defaultValue="member">
+                    <option value="member">Member</option>
+                  </Select>
+                </Field>
+                <Button type="submit">+ Invite</Button>
+              </form>
+
               <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted">
                 Pending Invites
               </p>
               {!invites?.length ? (
-                <p className="mb-4 font-mono text-xs text-muted">No pending invites.</p>
+                <p className="font-mono text-xs text-muted">No pending invites.</p>
               ) : (
-                <ul className="mb-4 flex flex-col divide-y divide-ink/20">
+                <ul className="flex flex-col divide-y divide-ink/20">
                   {invites.map((invite) => (
                     <li key={invite.id} className="flex items-center justify-between py-2">
                       <span className="font-mono text-xs text-ink">{invite.email}</span>
@@ -78,12 +108,6 @@ export default async function TeamPage() {
                   ))}
                 </ul>
               )}
-              <form action={inviteMember} className="flex items-end gap-3">
-                <Field label="Invite by Email" htmlFor="invite-email">
-                  <Input id="invite-email" name="email" type="email" required placeholder="teammate@company.com" />
-                </Field>
-                <Button type="submit">Send Invite</Button>
-              </form>
             </>
           )}
         </CardBody>

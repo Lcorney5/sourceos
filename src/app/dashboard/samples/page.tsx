@@ -6,15 +6,23 @@ import { Table, Thead, Th, Tr, Td, EmptyState } from "@/components/ui/table";
 import { SampleStatusSelect } from "@/components/samples/sample-status-select";
 import Link from "next/link";
 
-export default async function SamplesPage() {
+export default async function SamplesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string }>;
+}) {
+  const { product } = await searchParams;
   const { workspace } = await requireWorkspace();
   const supabase = await createClient();
 
-  const { data: samples } = await supabase
+  const baseQuery = supabase
     .from("samples")
     .select("*, suppliers(name)")
-    .eq("workspace_id", workspace.id)
-    .order("date_updated", { ascending: false });
+    .eq("workspace_id", workspace.id);
+
+  const { data: samples } = product
+    ? await baseQuery.eq("product_name", product).order("date_updated", { ascending: false })
+    : await baseQuery.order("date_updated", { ascending: false });
 
   return (
     <div>

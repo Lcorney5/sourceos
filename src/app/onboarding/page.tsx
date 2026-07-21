@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionProfile } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
-import { CreateWorkspaceForm } from "./create-workspace-form";
+import { OnboardingChoice } from "./onboarding-choice";
 import { AuthCard } from "@/components/auth/auth-card";
 
 export default async function OnboardingPage() {
@@ -25,7 +25,7 @@ export default async function OnboardingPage() {
 
   return (
     <AuthCard title="Name Your Workspace" subtitle="One-Time Setup" footer={null}>
-      <CreateWorkspaceForm />
+      <OnboardingChoice />
     </AuthCard>
   );
 }

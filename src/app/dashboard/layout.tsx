@@ -35,6 +35,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           >
             Billing
           </Link>
+          <Link
+            href="/dashboard/feedback"
+            className="block border border-transparent px-3 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-ink hover:border-ink"
+          >
+            Feedback
+          </Link>
           <div className="mt-2 flex items-center justify-between px-3 py-1">
             <span className="truncate font-mono text-[0.6875rem] text-muted">
               {profile.email}
