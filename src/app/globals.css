@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #EDEAE0;
+  --color-paper-card: #F3F1E9;
+  --color-ink: #1B2430;
+  --color-rust: #B23A11;
+  --color-steel: #3C5875;
+  --color-amber: #8A6412;
+  --color-muted: #5B6570;
+
+  --font-display: var(--font-oswald), sans-serif;
+  --font-body: var(--font-plex-sans), sans-serif;
+  --font-data: var(--font-plex-mono), monospace;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-card: var(--color-paper-card);
+  --color-ink: var(--color-ink);
+  --color-rust: var(--color-rust);
+  --color-steel: var(--color-steel);
+  --color-amber: var(--color-amber);
+  --color-muted: var(--color-muted);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-data: var(--font-data);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+* {
+  border-color: var(--color-ink);
+}
+
+::selection {
+  background: var(--color-rust);
+  color: var(--color-paper);
+}
+
+.stamp {
+  display: inline-block;
+  font-family: var(--font-data);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}
+
+.hairline {
+  border-width: 1px;
+}
