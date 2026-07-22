@@ -4,10 +4,22 @@ import { PageHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/table";
 import { withSignedUrls, formatFileSize } from "@/lib/documents";
 import { DeleteDocumentButton } from "@/components/documents/delete-document-button";
+import { UpgradeGate } from "@/components/dashboard/upgrade-gate";
+import { hasFeature, FEATURE_MIN_PLAN } from "@/lib/plan-limits";
 import Link from "next/link";
 
 export default async function DocumentsPage() {
   const { workspace } = await requireWorkspace();
+
+  if (!hasFeature(workspace.plan, FEATURE_MIN_PLAN.documents)) {
+    return (
+      <div>
+        <PageHeader eyebrow="Manifest" title="Documents" />
+        <UpgradeGate feature="Document Center" minPlan={FEATURE_MIN_PLAN.documents} />
+      </div>
+    );
+  }
+
   const supabase = await createClient();
 
   const { data: documents } = await supabase

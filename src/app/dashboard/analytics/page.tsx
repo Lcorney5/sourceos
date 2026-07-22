@@ -3,10 +3,22 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, CardBody } from "@/components/ui/card";
 import { BarChart } from "@/components/analytics/bar-chart";
 import { LineChart, type LineSeries } from "@/components/analytics/line-chart";
+import { UpgradeGate } from "@/components/dashboard/upgrade-gate";
+import { hasFeature, FEATURE_MIN_PLAN } from "@/lib/plan-limits";
 import { isPurchaseOrderOverdue } from "@/lib/purchase-orders";
 
 export default async function AnalyticsPage() {
   const { workspace } = await requireWorkspace();
+
+  if (!hasFeature(workspace.plan, FEATURE_MIN_PLAN.analytics)) {
+    return (
+      <div>
+        <PageHeader eyebrow="Manifest" title="Performance Analytics" />
+        <UpgradeGate feature="Performance Analytics" minPlan={FEATURE_MIN_PLAN.analytics} />
+      </div>
+    );
+  }
+
   const supabase = await createClient();
 
   const [{ data: quotes }, { data: purchaseOrders }, { data: suppliers }] = await Promise.all([

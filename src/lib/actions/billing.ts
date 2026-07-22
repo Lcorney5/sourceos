@@ -7,8 +7,13 @@ import { getStripe, PLAN_PRICE_IDS, type PlanKey } from "@/lib/stripe";
 
 async function requireOwner() {
   const context = await requireWorkspace();
-  if (context.profile.role !== "owner") {
+  if (!context.isOwner) {
     throw new Error("Only the workspace owner can manage billing");
+  }
+  if (!context.isHomeWorkspace) {
+    throw new Error(
+      "Client workspaces are billed under the home workspace's Agency plan and can't be subscribed separately."
+    );
   }
   return context;
 }

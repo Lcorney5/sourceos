@@ -1,4 +1,5 @@
 import { requireWorkspace } from "@/lib/auth/dal";
+import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StampBadge } from "@/components/ui/stamp-badge";
@@ -11,27 +12,70 @@ const TIERS: { key: PlanKey; name: string; price: string; blurb: string; feature
     name: "Starter",
     price: "$15/mo",
     blurb: "1 user, up to 3 active products",
-    features: ["Supplier & quote tracking"],
+    features: [
+      "Supplier, quote & sample tracking",
+      "Purchase order tracking",
+      "Up to 25 suppliers",
+      "Up to 5 team members",
+    ],
   },
   {
     key: "growth",
     name: "Growth",
     price: "$60/mo",
     blurb: "Up to 3 users, unlimited products",
-    features: ["Full sample & PO tracking", "Timeline view", "AI quote parsing"],
+    features: [
+      "Everything in Starter",
+      "Performance analytics",
+      "Document center",
+      "Production tracking",
+      "Up to 100 suppliers",
+      "Up to 15 team members",
+    ],
   },
   {
     key: "agency",
     name: "Agency",
     price: "$130/mo",
     blurb: "Multi-client workspaces, unlimited users",
-    features: ["Everything in Growth", "AI negotiation-assist", "Supplier risk flagging"],
+    features: [
+      "Everything in Growth",
+      "Activity log & audit trail",
+      "Multi-client workspaces",
+      "Unlimited suppliers & team members",
+    ],
   },
 ];
 
 export default async function BillingPage() {
-  const { workspace, profile } = await requireWorkspace();
-  const isOwner = profile.role === "owner";
+  const { workspace, profile, isOwner, isHomeWorkspace } = await requireWorkspace();
+
+  if (!isHomeWorkspace) {
+    const supabase = await createClient();
+    const { data: homeWorkspace } = await supabase
+      .from("workspaces")
+      .select("name")
+      .eq("id", profile.workspace_id!)
+      .single();
+
+    return (
+      <div>
+        <PageHeader eyebrow="Workspace" title="Billing" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Current Plan</CardTitle>
+          </CardHeader>
+          <CardBody className="flex items-center gap-3">
+            <StampBadge tone="steel">{workspace.plan}</StampBadge>
+            <p className="font-mono text-xs text-muted">
+              Billed under <span className="text-ink">{homeWorkspace?.name ?? "your home workspace"}</span>
+              &apos;s Agency plan — no separate subscription for this client workspace.
+            </p>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div>

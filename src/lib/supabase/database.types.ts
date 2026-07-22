@@ -27,6 +27,7 @@ export interface Database {
           subscription_status: SubscriptionStatus;
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
+          billed_via_workspace_id: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["workspaces"]["Row"]> & {
@@ -42,6 +43,7 @@ export interface Database {
           email: string;
           name: string | null;
           workspace_id: string | null;
+          active_workspace_id: string | null;
           role: WorkspaceRole;
           created_at: string;
         };
@@ -51,6 +53,36 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
         Relationships: [];
+      };
+      workspace_memberships: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          user_id: string;
+          role: WorkspaceRole;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["workspace_memberships"]["Row"]> & {
+          workspace_id: string;
+          user_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["workspace_memberships"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "workspace_memberships_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workspace_memberships_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       suppliers: {
         Row: {
@@ -393,6 +425,18 @@ export interface Database {
       join_workspace_by_id: {
         Args: { target_workspace_id: string };
         Returns: string;
+      };
+      create_client_workspace: {
+        Args: { client_name: string };
+        Returns: string;
+      };
+      switch_active_workspace: {
+        Args: { target_workspace_id: string };
+        Returns: string;
+      };
+      remove_workspace_member: {
+        Args: { target_user_id: string };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

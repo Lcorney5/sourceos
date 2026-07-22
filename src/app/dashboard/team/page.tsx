@@ -12,12 +12,15 @@ import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { inviteMember, revokeInvite, removeMember } from "@/lib/actions/workspace";
 
 export default async function TeamPage() {
-  const { workspace, profile, userId } = await requireWorkspace();
+  const { workspace, userId, isOwner } = await requireWorkspace();
   const supabase = await createClient();
-  const isOwner = profile.role === "owner";
 
-  const [{ data: members }, { data: invites }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("workspace_id", workspace.id).order("created_at"),
+  const [{ data: memberships }, { data: invites }] = await Promise.all([
+    supabase
+      .from("workspace_memberships")
+      .select("role, profiles(id, name, email)")
+      .eq("workspace_id", workspace.id)
+      .order("created_at"),
     isOwner
       ? supabase
           .from("workspace_invites")
@@ -27,7 +30,8 @@ export default async function TeamPage() {
       : Promise.resolve({ data: [] }),
   ]);
 
-  const memberCount = members?.length ?? 0;
+  const members = (memberships ?? []).flatMap((m) => (m.profiles ? [{ ...m.profiles, role: m.role }] : []));
+  const memberCount = members.length;
 
   return (
     <div>
@@ -51,7 +55,7 @@ export default async function TeamPage() {
         </CardHeader>
         <CardBody>
           <ul className="mb-6 flex flex-col divide-y divide-ink/20 border border-ink">
-            {members?.map((member) => (
+            {members.map((member) => (
               <li key={member.id} className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3">
                   {member.role === "owner" && <CrownIcon size={16} />}

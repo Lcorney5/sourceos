@@ -1,11 +1,31 @@
 import Link from "next/link";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { signOut } from "@/lib/auth/actions";
-import { StampBadge } from "@/components/ui/stamp-badge";
+import { createClient } from "@/lib/supabase/server";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
+import { WorkspaceSwitcher } from "@/components/dashboard/workspace-switcher";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { profile, workspace } = await requireWorkspace();
+  const { profile, workspace, isOwner, isHomeWorkspace } = await requireWorkspace();
+  const supabase = await createClient();
+
+  const { data: memberships } = await supabase
+    .from("workspace_memberships")
+    .select("workspace_id, workspaces(id, name, plan)")
+    .eq("user_id", profile.id);
+
+  const workspaceOptions = (memberships ?? []).flatMap((m) =>
+    m.workspaces
+      ? [
+          {
+            id: m.workspaces.id,
+            name: m.workspaces.name,
+            plan: m.workspaces.plan,
+            isHome: m.workspaces.id === profile.workspace_id,
+          },
+        ]
+      : []
+  );
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
@@ -14,12 +34,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/dashboard/home" className="font-display text-xl font-bold uppercase tracking-tight">
             Source<span className="text-rust">OS</span>
           </Link>
-          <p className="mt-1 truncate font-mono text-xs uppercase tracking-wide text-muted">
-            {workspace.name}
-          </p>
-          <StampBadge tone="steel" className="mt-2">
-            {workspace.plan}
-          </StampBadge>
+          <WorkspaceSwitcher
+            activeWorkspaceId={workspace.id}
+            activeName={workspace.name}
+            activePlan={workspace.plan}
+            workspaces={workspaceOptions}
+            canAddClient={isOwner && isHomeWorkspace && workspace.plan === "agency"}
+          />
         </div>
         <SidebarNav />
         <div className="border-t border-ink p-2">

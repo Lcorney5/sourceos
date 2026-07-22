@@ -10,3 +10,16 @@ export const PLAN_LIMITS: Record<WorkspacePlan, { suppliers: number | null; memb
 export function formatLimit(value: number | null): string {
   return value === null ? "Unlimited" : String(value);
 }
+
+export const PLAN_RANK: Record<WorkspacePlan, number> = { starter: 0, growth: 1, agency: 2 };
+
+export function hasFeature(plan: WorkspacePlan, minPlan: WorkspacePlan): boolean {
+  return PLAN_RANK[plan] >= PLAN_RANK[minPlan];
+}
+
+export const FEATURE_MIN_PLAN = {
+  analytics: "growth",
+  documents: "growth",
+  production: "growth",
+  activityLog: "agency",
+} as const satisfies Record<string, WorkspacePlan>;

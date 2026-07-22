@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
@@ -8,7 +9,7 @@ import { logActivity } from "@/lib/activity-log";
 
 async function requireOwner() {
   const context = await requireWorkspace();
-  if (context.profile.role !== "owner") {
+  if (!context.isOwner) {
     throw new Error("Only the workspace owner can do this");
   }
   return context;
@@ -27,7 +28,7 @@ export async function inviteMember(formData: FormData) {
   if (memberLimit !== null) {
     const [{ count: memberCount }, { count: inviteCount }] = await Promise.all([
       supabase
-        .from("profiles")
+        .from("workspace_memberships")
         .select("id", { count: "exact", head: true })
         .eq("workspace_id", workspace.id),
       supabase
@@ -86,14 +87,9 @@ export async function removeMember(profileId: string) {
     .from("profiles")
     .select("email")
     .eq("id", profileId)
-    .eq("workspace_id", workspace.id)
     .single();
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({ workspace_id: null, role: "member" })
-    .eq("id", profileId)
-    .eq("workspace_id", workspace.id);
+  const { error } = await supabase.rpc("remove_workspace_member", { target_user_id: profileId });
 
   if (error) throw new Error(error.message);
 
@@ -107,4 +103,37 @@ export async function removeMember(profileId: string) {
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/team");
+}
+
+export async function switchActiveWorkspace(workspaceId: string) {
+  await requireWorkspace();
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("switch_active_workspace", {
+    target_workspace_id: workspaceId,
+  });
+
+  if (error) throw new Error(error.message);
+
+  redirect("/dashboard/home");
+}
+
+export async function createClientWorkspace(formData: FormData) {
+  const { isHomeWorkspace, workspace } = await requireWorkspace();
+  if (!isHomeWorkspace) {
+    throw new Error("Switch back to your home workspace before creating a client workspace");
+  }
+  if (workspace.plan !== "agency") {
+    throw new Error("Only Agency-plan workspaces can create client workspaces");
+  }
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) throw new Error("Client workspace name is required");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("create_client_workspace", { client_name: name });
+
+  if (error) throw new Error(error.message);
+
+  redirect("/dashboard/home");
 }

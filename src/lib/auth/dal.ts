@@ -40,27 +40,44 @@ export const getSessionProfile = cache(async (): Promise<{
 
 // Requires the caller to have completed workspace onboarding. Redirects to
 // /onboarding otherwise. This is the primary guard used by dashboard pages.
+// Resolves to the caller's *active* workspace (which may be a client
+// workspace an Agency owner has switched into) — isOwner and isHomeWorkspace
+// are computed here since role is now workspace-scoped (via
+// workspace_memberships), not a single global value on the profile.
 export const requireWorkspace = cache(async (): Promise<{
   userId: string;
   profile: Profile;
   workspace: Workspace;
+  isOwner: boolean;
+  isHomeWorkspace: boolean;
 }> => {
   const { userId, profile } = await getSessionProfile();
 
-  if (!profile.workspace_id) {
+  const activeWorkspaceId = profile.active_workspace_id ?? profile.workspace_id;
+  if (!activeWorkspaceId) {
     redirect("/onboarding");
   }
 
   const supabase = await createClient();
-  const { data: workspace, error } = await supabase
-    .from("workspaces")
-    .select("*")
-    .eq("id", profile.workspace_id)
-    .single();
+  const [{ data: workspace, error }, { data: membership }] = await Promise.all([
+    supabase.from("workspaces").select("*").eq("id", activeWorkspaceId).single(),
+    supabase
+      .from("workspace_memberships")
+      .select("role")
+      .eq("workspace_id", activeWorkspaceId)
+      .eq("user_id", userId)
+      .single(),
+  ]);
 
   if (error || !workspace) {
     redirect("/onboarding");
   }
 
-  return { userId, profile, workspace };
+  return {
+    userId,
+    profile,
+    workspace,
+    isOwner: membership?.role === "owner",
+    isHomeWorkspace: workspace.id === profile.workspace_id,
+  };
 });

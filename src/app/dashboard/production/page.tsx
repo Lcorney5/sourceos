@@ -3,9 +3,21 @@ import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/table";
+import { UpgradeGate } from "@/components/dashboard/upgrade-gate";
+import { hasFeature, FEATURE_MIN_PLAN } from "@/lib/plan-limits";
 
 export default async function ProductionPage() {
   const { workspace } = await requireWorkspace();
+
+  if (!hasFeature(workspace.plan, FEATURE_MIN_PLAN.production)) {
+    return (
+      <div>
+        <PageHeader eyebrow="Manifest" title="Production" />
+        <UpgradeGate feature="Production Tracking" minPlan={FEATURE_MIN_PLAN.production} />
+      </div>
+    );
+  }
+
   const supabase = await createClient();
 
   const { data: purchaseOrders } = await supabase
