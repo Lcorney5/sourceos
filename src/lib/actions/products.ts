@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-log";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 
 function toNullableString(value: FormDataEntryValue | null) {
   if (!value || String(value).trim() === "") return null;
@@ -17,6 +18,19 @@ export async function createProduct(formData: FormData) {
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) throw new Error("Product name is required");
+
+  const productLimit = PLAN_LIMITS[workspace.plan].products;
+  if (productLimit !== null) {
+    const { count } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspace.id);
+    if ((count ?? 0) >= productLimit) {
+      throw new Error(
+        `Your ${workspace.plan} plan is limited to ${productLimit} active products. Upgrade to add more.`
+      );
+    }
+  }
 
   const { data, error } = await supabase
     .from("products")

@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/table";
+import { UsageMeter } from "@/components/ui/usage-meter";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { ProductCatalog, type ProductStat } from "@/components/products/product-catalog";
 
 export default async function ProductsPage() {
@@ -52,6 +54,13 @@ export default async function ProductsPage() {
         subtitle={`${list.length} SKUs being managed`}
         actions={<LinkButton href="/dashboard/products/new">+ Add Product</LinkButton>}
       />
+      <div className="mb-4">
+        <UsageMeter
+          label="active products used"
+          used={list.length}
+          limit={PLAN_LIMITS[workspace.plan].products}
+        />
+      </div>
       {!list.length ? (
         <EmptyState
           message="No products in your catalog yet."
