@@ -47,7 +47,16 @@ export default async function DirectoryPage() {
                 </Td>
                 <Td>{contact.company ?? "—"}</Td>
                 <Td>{contact.role ?? "—"}</Td>
-                <Td>{contact.email ?? contact.phone ?? "—"}</Td>
+                <Td>
+                  {contact.email || contact.phone ? (
+                    <div className="flex flex-col">
+                      {contact.email && <span>{contact.email}</span>}
+                      {contact.phone && <span className="text-muted">{contact.phone}</span>}
+                    </div>
+                  ) : (
+                    "—"
+                  )}
+                </Td>
               </Tr>
             ))}
           </tbody>
