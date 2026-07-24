@@ -46,7 +46,7 @@ function LoginForm() {
   return (
     <AuthCard
       title="Log In"
-      subtitle="SourceOS Access"
+      subtitle="SouceOS Access"
       footer={
         <>
           No account?{" "}

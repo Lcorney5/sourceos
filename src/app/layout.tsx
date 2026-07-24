@@ -21,7 +21,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-const title = "SourceOS — Production & Sourcing Manifest";
+const title = "SouceOS — Production & Sourcing Manifest";
 const description =
   "Track supplier quotes, samples, and purchase orders in one organized workspace.";
 
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     title,
     description,
     url: siteUrl,
-    siteName: "SourceOS",
+    siteName: "SouceOS",
     type: "website",
   },
   twitter: {

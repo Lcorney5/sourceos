@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — SourceOS",
-  description: "How SourceOS collects, uses, and protects your data.",
+  title: "Privacy Policy — SouceOS",
+  description: "How SouceOS collects, uses, and protects your data.",
 };
 
 const LAST_UPDATED = "July 23, 2026";
@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
             href="/"
             className="font-display text-lg font-bold uppercase tracking-tight"
           >
-            Source<span className="text-rust">OS</span>
+            Souce<span className="text-rust">OS</span>
           </Link>
         </div>
       </header>
@@ -33,10 +33,10 @@ export default function PrivacyPolicyPage() {
         <div className="flex flex-col gap-8 text-sm leading-relaxed">
           <p>
             This Privacy Policy explains how{" "}
-            <strong>[Legal Entity Name — e.g. &ldquo;SourceOS LLC&rdquo;, or your full legal
-            name if operating as a sole proprietor]</strong> (&ldquo;SourceOS,&rdquo;
+            <strong>[Legal Entity Name — e.g. &ldquo;SouceOS LLC&rdquo;, or your full legal
+            name if operating as a sole proprietor]</strong> (&ldquo;SouceOS,&rdquo;
             &ldquo;we,&rdquo; &ldquo;us&rdquo;) collects, uses, and shares information when you
-            use the SourceOS application and website (the &ldquo;Service&rdquo;). By using the
+            use the SouceOS application and website (the &ldquo;Service&rdquo;). By using the
             Service, you agree to the collection and use of information as described here.
           </p>
 
@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
               the basic profile information Google provides).
             </p>
             <p className="mb-3">
-              <strong>Business data you provide.</strong> SourceOS is a workspace for managing
+              <strong>Business data you provide.</strong> SouceOS is a workspace for managing
               your sourcing operations. In the ordinary course of using it, you and your team
               may enter supplier contacts, quotes, sample records and photos, purchase orders,
               production timelines, and related documents. This data belongs to you — see
@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
             <p className="mb-3">
               <strong>Messaging data.</strong> If you connect WhatsApp Business messaging, we
               process the messages and metadata needed to display that communication history
-              inside SourceOS, via <strong>Twilio</strong>.
+              inside SouceOS, via <strong>Twilio</strong>.
             </p>
             <p className="mb-3">
               <strong>Usage and diagnostic data.</strong> We use <strong>PostHog</strong> to
@@ -103,7 +103,7 @@ export default function PrivacyPolicyPage() {
             </h2>
             <p className="mb-3">
               We share information only with the service providers (&ldquo;subprocessors&rdquo;)
-              that help us run SourceOS, each bound to use it only to provide their service to
+              that help us run SouceOS, each bound to use it only to provide their service to
               us:
             </p>
             <ul className="ml-5 list-disc">
@@ -176,7 +176,7 @@ export default function PrivacyPolicyPage() {
               6. Your Business Data Belongs to You
             </h2>
             <p>
-              The supplier, product, and production data you and your team enter into SourceOS
+              The supplier, product, and production data you and your team enter into SouceOS
               is yours. We act as a processor of that data on your behalf — we don&apos;t use it
               to train models, sell it, or share it beyond what&apos;s needed to operate the
               Service as described above. You can export or delete it at any time.
@@ -211,7 +211,7 @@ export default function PrivacyPolicyPage() {
               9. Children&apos;s Privacy
             </h2>
             <p>
-              SourceOS is a business tool not directed at children, and we do not knowingly
+              SouceOS is a business tool not directed at children, and we do not knowingly
               collect personal information from anyone under 16.
             </p>
           </section>

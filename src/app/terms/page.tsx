@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — SourceOS",
-  description: "The terms that govern your use of SourceOS.",
+  title: "Terms of Service — SouceOS",
+  description: "The terms that govern your use of SouceOS.",
 };
 
 const LAST_UPDATED = "July 23, 2026";
@@ -17,7 +17,7 @@ export default function TermsPage() {
             href="/"
             className="font-display text-lg font-bold uppercase tracking-tight"
           >
-            Source<span className="text-rust">OS</span>
+            Souce<span className="text-rust">OS</span>
           </Link>
         </div>
       </header>
@@ -33,11 +33,11 @@ export default function TermsPage() {
         <div className="flex flex-col gap-8 text-sm leading-relaxed">
           <p>
             These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and use of
-            SourceOS, provided by{" "}
-            <strong>[Legal Entity Name — e.g. &ldquo;SourceOS LLC&rdquo;, or your full legal
-            name if operating as a sole proprietor]</strong> (&ldquo;SourceOS,&rdquo;
+            SouceOS, provided by{" "}
+            <strong>[Legal Entity Name — e.g. &ldquo;SouceOS LLC&rdquo;, or your full legal
+            name if operating as a sole proprietor]</strong> (&ldquo;SouceOS,&rdquo;
             &ldquo;we,&rdquo; &ldquo;us&rdquo;). By creating an account or using the Service,
-            you agree to these Terms. If you&apos;re using SourceOS on behalf of a company,
+            you agree to these Terms. If you&apos;re using SouceOS on behalf of a company,
             you&apos;re agreeing on that company&apos;s behalf and confirming you have the
             authority to do so.
           </p>
@@ -47,7 +47,7 @@ export default function TermsPage() {
               1. The Service
             </h2>
             <p>
-              SourceOS is a workspace for managing supplier relationships, quotes, samples,
+              SouceOS is a workspace for managing supplier relationships, quotes, samples,
               purchase orders, and production tracking for sourcing physical products. We may
               add, change, or remove features at any time, and may modify or discontinue the
               Service (in whole or part) with reasonable notice where the change is material.
@@ -71,7 +71,7 @@ export default function TermsPage() {
               3. Subscriptions & Billing
             </h2>
             <p className="mb-3">
-              SourceOS is offered on paid monthly subscription plans (currently Starter,
+              SouceOS is offered on paid monthly subscription plans (currently Starter,
               Growth, and Agency). By subscribing, you authorize us (via Stripe) to charge your
               payment method on a recurring basis until you cancel.
             </p>
@@ -119,7 +119,7 @@ export default function TermsPage() {
               5. Your Data
             </h2>
             <p>
-              You retain all rights to the data you and your team enter into SourceOS
+              You retain all rights to the data you and your team enter into SouceOS
               (&ldquo;Customer Data&rdquo;). You grant us a limited license to host, process,
               and display Customer Data solely to provide the Service to you. See our{" "}
               <Link href="/privacy" className="text-rust underline">
@@ -127,7 +127,7 @@ export default function TermsPage() {
               </Link>{" "}
               for how we handle it. If you use a multi-client Agency workspace, you are
               responsible for having the appropriate rights and permissions to store your
-              clients&apos; data within SourceOS and for managing which team members can access
+              clients&apos; data within SouceOS and for managing which team members can access
               it.
             </p>
           </section>
@@ -137,7 +137,7 @@ export default function TermsPage() {
               6. Intellectual Property
             </h2>
             <p>
-              SourceOS and its underlying software, design, and branding are owned by us and
+              SouceOS and its underlying software, design, and branding are owned by us and
               protected by intellectual property laws. These Terms don&apos;t grant you any
               rights to our trademarks, logos, or brand assets. Subject to these Terms, we
               grant you a limited, non-exclusive, non-transferable license to use the Service
@@ -174,7 +174,7 @@ export default function TermsPage() {
               9. Limitation of Liability
             </h2>
             <p className="uppercase">
-              To the maximum extent permitted by law, SourceOS will not be liable for any
+              To the maximum extent permitted by law, SouceOS will not be liable for any
               indirect, incidental, special, consequential, or punitive damages, or any loss of
               profits, revenue, data, or business opportunity, arising from your use of the
               service. Our total liability for any claim arising out of these terms or the

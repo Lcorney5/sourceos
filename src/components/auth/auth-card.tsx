@@ -14,7 +14,7 @@ export function AuthCard({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-paper px-4 py-12">
       <Link href="/" className="mb-8 font-display text-2xl font-bold uppercase tracking-tight">
-        Source<span className="text-rust">OS</span>
+        Souce<span className="text-rust">OS</span>
       </Link>
       <div className="w-full max-w-sm border border-ink bg-paper-card p-6">
         <p className="mb-1 font-mono text-xs uppercase tracking-widest text-muted">

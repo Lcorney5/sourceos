@@ -88,7 +88,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div>
             <span className="font-display text-xl font-bold uppercase tracking-tight">
-              Source<span className="text-rust">OS</span>
+              Souce<span className="text-rust">OS</span>
             </span>
             <p className="font-mono text-[0.625rem] uppercase tracking-widest text-muted">
               Production &amp; Sourcing Manifest
@@ -117,7 +117,7 @@ export default function LandingPage() {
             Your suppliers, samples, and POs stop living in five different apps
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-ink">
-            SourceOS replaces the spreadsheets, WhatsApp threads, and inbox chaos of sourcing
+            SouceOS replaces the spreadsheets, WhatsApp threads, and inbox chaos of sourcing
             physical products overseas with one organized manifest — built for founders who
             source their own product.
           </p>
@@ -208,7 +208,7 @@ export default function LandingPage() {
       <footer className="mt-auto border-t border-ink bg-paper">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <span className="font-display text-lg font-bold uppercase tracking-tight">
-            Source<span className="text-rust">OS</span>
+            Souce<span className="text-rust">OS</span>
           </span>
           <div className="flex items-center gap-4 font-mono text-xs text-muted">
             <Link href="/privacy" className="hover:text-rust">
@@ -219,7 +219,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="font-mono text-xs text-muted">
-            © {new Date().getFullYear()} SourceOS. All rights reserved.
+            © {new Date().getFullYear()} SouceOS. All rights reserved.
           </p>
         </div>
       </footer>

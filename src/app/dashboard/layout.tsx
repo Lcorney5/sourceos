@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <aside className="flex w-full flex-col border-b border-ink bg-paper-card md:h-screen md:w-56 md:border-b-0 md:border-r">
         <div className="border-b border-ink px-4 py-4">
           <Link href="/dashboard/home" className="font-display text-xl font-bold uppercase tracking-tight">
-            Source<span className="text-rust">OS</span>
+            Souce<span className="text-rust">OS</span>
           </Link>
           <WorkspaceSwitcher
             activeWorkspaceId={workspace.id}

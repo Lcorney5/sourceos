@@ -50,7 +50,7 @@ export function WhatsappConnect({
         </p>
         <p className="mb-4 text-sm text-ink">
           Connecting <strong>{number}</strong> will sync all future WhatsApp messages with this
-          number into SourceOS, including messages sent by the supplier. No existing chat history
+          number into SouceOS, including messages sent by the supplier. No existing chat history
           is imported automatically. Only proceed if you have a lawful basis to store this
           supplier&apos;s messages.
         </p>

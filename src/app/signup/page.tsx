@@ -59,7 +59,7 @@ export default function SignupPage() {
 
   if (confirmationSent) {
     return (
-      <AuthCard title="Check Your Inbox" subtitle="SourceOS Access" footer={null}>
+      <AuthCard title="Check Your Inbox" subtitle="SouceOS Access" footer={null}>
         <p className="font-body text-sm text-ink">
           We sent a confirmation link to <strong>{email}</strong>. Click it to activate your
           account.
@@ -71,7 +71,7 @@ export default function SignupPage() {
   return (
     <AuthCard
       title="Sign Up"
-      subtitle="SourceOS Access"
+      subtitle="SouceOS Access"
       footer={
         <>
           Already have an account?{" "}
