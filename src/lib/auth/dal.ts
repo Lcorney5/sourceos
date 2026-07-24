@@ -44,12 +44,20 @@ export const getSessionProfile = cache(async (): Promise<{
 // workspace an Agency owner has switched into) — isOwner and isHomeWorkspace
 // are computed here since role is now workspace-scoped (via
 // workspace_memberships), not a single global value on the profile.
+export type WorkspaceOption = {
+  id: string;
+  name: string;
+  plan: string;
+  isHome: boolean;
+};
+
 export const requireWorkspace = cache(async (): Promise<{
   userId: string;
   profile: Profile;
   workspace: Workspace;
   isOwner: boolean;
   isHomeWorkspace: boolean;
+  workspaceOptions: WorkspaceOption[];
 }> => {
   const { userId, profile } = await getSessionProfile();
 
@@ -59,19 +67,40 @@ export const requireWorkspace = cache(async (): Promise<{
   }
 
   const supabase = await createClient();
-  const [{ data: workspace, error }, { data: membership }] = await Promise.all([
-    supabase.from("workspaces").select("*").eq("id", activeWorkspaceId).single(),
-    supabase
-      .from("workspace_memberships")
-      .select("role")
-      .eq("workspace_id", activeWorkspaceId)
-      .eq("user_id", userId)
-      .single(),
-  ]);
+  // Fetched together (not sequentially) since the layout's workspace switcher
+  // and the page guard both need data on every navigation — halving one of
+  // the round-trips that made dashboard navigation feel sluggish.
+  const [{ data: workspace, error }, { data: membership }, { data: memberships }] =
+    await Promise.all([
+      supabase.from("workspaces").select("*").eq("id", activeWorkspaceId).single(),
+      supabase
+        .from("workspace_memberships")
+        .select("role")
+        .eq("workspace_id", activeWorkspaceId)
+        .eq("user_id", userId)
+        .single(),
+      supabase
+        .from("workspace_memberships")
+        .select("workspace_id, workspaces(id, name, plan)")
+        .eq("user_id", userId),
+    ]);
 
   if (error || !workspace) {
     redirect("/onboarding");
   }
+
+  const workspaceOptions: WorkspaceOption[] = (memberships ?? []).flatMap((m) =>
+    m.workspaces
+      ? [
+          {
+            id: m.workspaces.id,
+            name: m.workspaces.name,
+            plan: m.workspaces.plan,
+            isHome: m.workspaces.id === profile.workspace_id,
+          },
+        ]
+      : []
+  );
 
   return {
     userId,
@@ -79,5 +108,6 @@ export const requireWorkspace = cache(async (): Promise<{
     workspace,
     isOwner: membership?.role === "owner",
     isHomeWorkspace: workspace.id === profile.workspace_id,
+    workspaceOptions,
   };
 });

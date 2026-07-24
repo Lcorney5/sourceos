@@ -1,31 +1,12 @@
 import Link from "next/link";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { signOut } from "@/lib/auth/actions";
-import { createClient } from "@/lib/supabase/server";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { WorkspaceSwitcher } from "@/components/dashboard/workspace-switcher";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { profile, workspace, isOwner, isHomeWorkspace } = await requireWorkspace();
-  const supabase = await createClient();
-
-  const { data: memberships } = await supabase
-    .from("workspace_memberships")
-    .select("workspace_id, workspaces(id, name, plan)")
-    .eq("user_id", profile.id);
-
-  const workspaceOptions = (memberships ?? []).flatMap((m) =>
-    m.workspaces
-      ? [
-          {
-            id: m.workspaces.id,
-            name: m.workspaces.name,
-            plan: m.workspaces.plan,
-            isHome: m.workspaces.id === profile.workspace_id,
-          },
-        ]
-      : []
-  );
+  const { profile, workspace, isOwner, isHomeWorkspace, workspaceOptions } =
+    await requireWorkspace();
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
