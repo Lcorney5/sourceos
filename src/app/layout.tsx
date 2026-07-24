@@ -20,10 +20,27 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const title = "SourceOS — Production & Sourcing Manifest";
+const description =
+  "Track supplier quotes, samples, and purchase orders in one organized workspace.";
+
 export const metadata: Metadata = {
-  title: "SourceOS — Production & Sourcing Manifest",
-  description:
-    "Track supplier quotes, samples, and purchase orders in one organized workspace.",
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    url: siteUrl,
+    siteName: "SourceOS",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title,
+    description,
+  },
 };
 
 export default function RootLayout({
