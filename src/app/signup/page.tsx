@@ -117,6 +117,17 @@ export default function SignupPage() {
       <Button type="button" variant="secondary" onClick={handleGoogle} className="w-full">
         Continue with Google
       </Button>
+      <p className="mt-4 text-center font-mono text-[0.6875rem] text-muted">
+        By signing up, you agree to our{" "}
+        <Link href="/terms" className="text-rust underline">
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="text-rust underline">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </AuthCard>
   );
 }

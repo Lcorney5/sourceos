@@ -210,6 +210,14 @@ export default function LandingPage() {
           <span className="font-display text-lg font-bold uppercase tracking-tight">
             Source<span className="text-rust">OS</span>
           </span>
+          <div className="flex items-center gap-4 font-mono text-xs text-muted">
+            <Link href="/privacy" className="hover:text-rust">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-rust">
+              Terms of Service
+            </Link>
+          </div>
           <p className="font-mono text-xs text-muted">
             © {new Date().getFullYear()} SourceOS. All rights reserved.
           </p>
