@@ -37,3 +37,41 @@
   screenshots where a login was required, since the assistant does not enter
   passwords into login forms under any circumstances (a hard rule, not a
   workaround) — the human always did test-account logins/checks personally.
+- **The domain typo — a multi-session misdiagnosis, fully resolved
+  2026-07-24.** For days across multiple sessions, DNS troubleshooting
+  targeted `sourceos.com` — checking, re-checking, escalating to Squarespace
+  support, building an entire "Squarespace DNS panel isn't syncing to the
+  live zone" theory to explain why records kept showing as foreign/stale no
+  matter what was changed. The actual registered domain was `souceos.com`
+  (missing the "r") the entire time — `sourceos.com` belongs to an unrelated
+  third party (registered 2013, confirmed via whois, actively used — that's
+  why it always showed a real business's Barracuda/Outlook mail
+  configuration). There was **no Squarespace bug at all**. Squarespace
+  support's repeated claims of "everything is detected as configured" were
+  actually true the whole time, just for the domain that was really owned.
+  **Lesson for future sessions**: when a user references "our domain" by
+  name, verify it actually matches what's registered in their account before
+  spending significant troubleshooting time — don't assume a name given
+  early in conversation is correct without confirming it against the actual
+  account/panel.
+- **Google OAuth 400 error** — see [changelog.md](./changelog.md) #18. Root
+  cause was simply that the provider was never enabled in Supabase, despite
+  the sign-in button already existing in the UI from an earlier session.
+- **Dashboard multi-second navigation latency** — see
+  [changelog.md](./changelog.md) #20 for the three-part root cause (no
+  loading state, a redundant sequential DB query, wrong Vercel region).
+- **Reddit's "no AI-generated content" rule** — discovered only after
+  drafting a reply and getting user approval to post it, by noticing the
+  subreddit's sidebar rules while attempting to fill in the comment box.
+  **Lesson for future sessions**: check a subreddit's posted rules *before*
+  drafting content for it, not after — this cost a full drafting cycle that
+  had to be redone by the user personally instead.
+- **LinkedIn cold outreach via search — not a bug, but a real channel
+  limitation worth recording.** Content search is dominated by sourcing
+  agencies/consultants who SEO-optimize around the exact keywords a genuine
+  founder's post would use, and people search is restricted to 3rd-degree
+  connections without a paid LinkedIn tier (this account has only 2
+  connections). Concluded this channel isn't productive right now without
+  either an existing network or a paid upgrade — don't keep retrying the
+  same keyword-search approach in future sessions without one of those two
+  changing.

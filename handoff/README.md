@@ -1,6 +1,11 @@
-# SourceOS — Handoff
+# SouceOS — Handoff
 
-Last updated: 2026-07-22
+Last updated: 2026-07-24
+
+**Renamed from "SourceOS" to "SouceOS" on 2026-07-24** — see
+[current-state.md](./current-state.md) for why (short version: the real
+domain is `souceos.com`, a typo made at purchase and kept deliberately, so
+the brand was changed to match it everywhere).
 
 Start here, then jump into whichever file matches what you need:
 
@@ -15,7 +20,7 @@ Start here, then jump into whichever file matches what you need:
 
 ## Goal
 
-SourceOS is a B2B SaaS tool for DTC/physical-product brand founders who source
+SouceOS is a B2B SaaS tool for DTC/physical-product brand founders who source
 manufacturing overseas. It replaces spreadsheets/WhatsApp/email chaos with one
 workspace for tracking suppliers, quotes, samples, purchase orders, and
 production — from first quote to delivered order.
