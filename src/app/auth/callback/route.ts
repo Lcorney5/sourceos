@@ -7,12 +7,14 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const plan = searchParams.get("plan");
+  const onboardingUrl = `${origin}/onboarding${plan ? `?plan=${plan}` : ""}`;
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}/onboarding`);
+      return NextResponse.redirect(onboardingUrl);
     }
   }
 

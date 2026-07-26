@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { WaitlistForm } from "@/components/landing/waitlist-form";
+import { LinkButton } from "@/components/ui/button";
 import { StampBadge } from "@/components/ui/stamp-badge";
+import type { PlanKey } from "@/lib/plans";
 
 const PROBLEMS = [
   {
@@ -40,8 +41,16 @@ const FEATURES = [
   },
 ];
 
-const PRICING = [
+const PRICING: {
+  key: PlanKey;
+  name: string;
+  price: string;
+  blurb: string;
+  features: string[];
+  featured: boolean;
+}[] = [
   {
+    key: "starter",
     name: "Starter",
     price: "$15",
     blurb: "1 user, up to 3 active products",
@@ -54,6 +63,7 @@ const PRICING = [
     featured: false,
   },
   {
+    key: "growth",
     name: "Growth",
     price: "$60",
     blurb: "Up to 3 users, unlimited products",
@@ -68,6 +78,7 @@ const PRICING = [
     featured: true,
   },
   {
+    key: "agency",
     name: "Agency",
     price: "$130",
     blurb: "Multi-client workspaces, unlimited users",
@@ -101,17 +112,17 @@ export default function LandingPage() {
             >
               Log In
             </Link>
-            <Link href="#waitlist" className="stamp text-rust border-rust">
-              Join Waitlist
-            </Link>
+            <LinkButton href="/signup" variant="primary">
+              Get Started
+            </LinkButton>
           </div>
         </div>
       </header>
 
       <section className="border-b border-ink bg-paper">
         <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-          <StampBadge tone="amber" rotate={false} className="mb-6">
-            Coming Soon
+          <StampBadge tone="steel" rotate={false} className="mb-6">
+            Founding-Member Pricing
           </StampBadge>
           <h1 className="mb-6 font-display text-4xl font-bold uppercase leading-tight tracking-tight md:text-6xl">
             Your suppliers, samples, and POs stop living in five different apps
@@ -121,8 +132,13 @@ export default function LandingPage() {
             physical products overseas with one organized manifest — built for founders who
             source their own product.
           </p>
-          <div id="waitlist" className="flex justify-center">
-            <WaitlistForm />
+          <div className="flex flex-wrap justify-center gap-3">
+            <LinkButton href="/signup" variant="primary" className="px-6 py-3 text-sm">
+              Get Started Free
+            </LinkButton>
+            <LinkButton href="#pricing" variant="secondary" className="px-6 py-3 text-sm">
+              See Pricing
+            </LinkButton>
           </div>
         </div>
       </section>
@@ -168,16 +184,20 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="border-b border-ink bg-paper-card">
+      <section id="pricing" className="border-b border-ink bg-paper-card">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <p className="mb-8 text-center font-mono text-xs uppercase tracking-widest text-muted">
+          <p className="mb-2 text-center font-mono text-xs uppercase tracking-widest text-muted">
             Pricing
+          </p>
+          <p className="mb-8 text-center text-sm text-muted">
+            Free for your first month. Founding members keep today&apos;s price for as long as
+            they stay subscribed.
           </p>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {PRICING.map((tier) => (
               <div
                 key={tier.name}
-                className={`relative border bg-paper p-6 ${tier.featured ? "border-2 border-rust" : "border-ink"}`}
+                className={`relative flex flex-col border bg-paper p-6 ${tier.featured ? "border-2 border-rust" : "border-ink"}`}
               >
                 {tier.featured && (
                   <StampBadge tone="rust" className="absolute -top-3 right-4">
@@ -192,13 +212,20 @@ export default function LandingPage() {
                   <span className="text-sm text-muted">/mo</span>
                 </p>
                 <p className="mt-2 text-sm text-muted">{tier.blurb}</p>
-                <ul className="mt-4 flex flex-col gap-1">
+                <ul className="mt-4 mb-6 flex flex-1 flex-col gap-1">
                   {tier.features.map((f) => (
                     <li key={f} className="font-mono text-xs text-ink">
                       · {f}
                     </li>
                   ))}
                 </ul>
+                <LinkButton
+                  href={`/signup?plan=${tier.key}`}
+                  variant={tier.featured ? "primary" : "secondary"}
+                  className="w-full"
+                >
+                  Select {tier.name}
+                </LinkButton>
               </div>
             ))}
           </div>

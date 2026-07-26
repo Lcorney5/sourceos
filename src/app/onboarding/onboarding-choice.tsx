@@ -4,12 +4,12 @@ import { useState } from "react";
 import { CreateWorkspaceForm } from "./create-workspace-form";
 import { JoinWorkspaceForm } from "./join-workspace-form";
 
-export function OnboardingChoice() {
+export function OnboardingChoice({ plan }: { plan?: string }) {
   const [mode, setMode] = useState<"create" | "join">("create");
 
   return (
     <div>
-      {mode === "create" ? <CreateWorkspaceForm /> : <JoinWorkspaceForm />}
+      {mode === "create" ? <CreateWorkspaceForm plan={plan} /> : <JoinWorkspaceForm />}
       <button
         type="button"
         onClick={() => setMode(mode === "create" ? "join" : "create")}

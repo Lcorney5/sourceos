@@ -1,5 +1,6 @@
 import "server-only";
 import Stripe from "stripe";
+import { PLAN_KEYS, type PlanKey } from "@/lib/plans";
 
 // Lazily constructed so importing this module doesn't throw at build time
 // (e.g. during static page-data collection) when STRIPE_SECRET_KEY isn't
@@ -18,13 +19,14 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-export const PLAN_PRICE_IDS = {
+export const PLAN_PRICE_IDS: Record<PlanKey, string | undefined> = {
   starter: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER,
   growth: process.env.NEXT_PUBLIC_STRIPE_PRICE_GROWTH,
   agency: process.env.NEXT_PUBLIC_STRIPE_PRICE_AGENCY,
-} as const;
+};
 
-export type PlanKey = keyof typeof PLAN_PRICE_IDS;
+export type { PlanKey };
+export { PLAN_KEYS };
 
 export function planForPriceId(priceId: string | null | undefined): PlanKey | null {
   if (!priceId) return null;

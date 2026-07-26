@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { AuthCard } from "@/components/auth/auth-card";
@@ -9,7 +9,17 @@ import { Field, Input } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const plan = searchParams.get("plan");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +38,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { name },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback${plan ? `?plan=${plan}` : ""}`,
       },
     });
 
@@ -45,7 +55,7 @@ export default function SignupPage() {
       return;
     }
 
-    router.push("/onboarding");
+    router.push(`/onboarding${plan ? `?plan=${plan}` : ""}`);
     router.refresh();
   }
 
@@ -53,7 +63,9 @@ export default function SignupPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback${plan ? `?plan=${plan}` : ""}`,
+      },
     });
   }
 

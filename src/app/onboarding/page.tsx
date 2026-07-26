@@ -4,7 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { OnboardingChoice } from "./onboarding-choice";
 import { AuthCard } from "@/components/auth/auth-card";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string }>;
+}) {
+  const { plan } = await searchParams;
   const { profile } = await getSessionProfile();
 
   if (profile.workspace_id) {
@@ -25,7 +30,7 @@ export default async function OnboardingPage() {
 
   return (
     <AuthCard title="Name Your Workspace" subtitle="One-Time Setup" footer={null}>
-      <OnboardingChoice />
+      <OnboardingChoice plan={plan} />
     </AuthCard>
   );
 }
