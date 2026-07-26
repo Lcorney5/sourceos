@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { LinkButton } from "@/components/ui/button";
 import { StampBadge } from "@/components/ui/stamp-badge";
+import { ProductPreview } from "@/components/landing/product-preview";
+import { SamplesPreview } from "@/components/landing/samples-preview";
+import { POPreview } from "@/components/landing/po-preview";
 import type { PlanKey } from "@/lib/plans";
 
 const PROBLEMS = [
@@ -141,6 +144,9 @@ export default function LandingPage() {
             </LinkButton>
           </div>
         </div>
+        <div className="px-6 pb-20">
+          <ProductPreview />
+        </div>
       </section>
 
       <section className="border-b border-ink bg-paper-card">
@@ -162,6 +168,18 @@ export default function LandingPage() {
       </section>
 
       <section className="border-b border-ink bg-paper">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <p className="mb-10 text-center font-mono text-xs uppercase tracking-widest text-muted">
+            See It In Action
+          </p>
+          <div className="flex flex-col gap-10">
+            <SamplesPreview />
+            <POPreview />
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-ink bg-paper-card">
         <div className="mx-auto max-w-4xl px-6 py-16">
           <p className="mb-8 text-center font-mono text-xs uppercase tracking-widest text-muted">
             Everything In One Manifest
