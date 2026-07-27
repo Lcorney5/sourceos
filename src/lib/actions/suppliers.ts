@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
-import { normalizePhoneNumber } from "@/lib/phone";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { logActivity } from "@/lib/activity-log";
 
@@ -158,27 +157,4 @@ export async function addCommunicationLogEntry(supplierId: string, formData: For
   if (error) throw new Error(error.message);
 
   revalidatePath(`/dashboard/suppliers/${supplierId}`);
-}
-
-export async function setWhatsappConnection(
-  supplierId: string,
-  whatsappNumber: string,
-  connected: boolean
-) {
-  const { workspace } = await requireWorkspace();
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from("suppliers")
-    .update({
-      whatsapp_number: connected ? normalizePhoneNumber(whatsappNumber) : null,
-      whatsapp_connected: connected,
-    })
-    .eq("id", supplierId)
-    .eq("workspace_id", workspace.id);
-
-  if (error) throw new Error(error.message);
-
-  revalidatePath(`/dashboard/suppliers/${supplierId}`);
-  revalidatePath("/dashboard/settings");
 }

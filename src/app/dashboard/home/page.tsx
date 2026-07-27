@@ -12,7 +12,6 @@ const QUICK_LINKS = [
   { href: "/dashboard/purchase-orders", label: "Purchase Orders" },
   { href: "/dashboard/calendar", label: "Calendar" },
   { href: "/dashboard/documents", label: "Documents" },
-  { href: "/dashboard/messages", label: "Messages" },
   { href: "/dashboard/finance", label: "Finance" },
 ];
 

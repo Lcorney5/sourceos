@@ -17,7 +17,6 @@ import {
   CalendarIcon,
   ProductionIcon,
   DocumentsIcon,
-  MessagesIcon,
   TeamIcon,
 } from "@/components/dashboard/nav-icons";
 
@@ -37,7 +36,6 @@ const NAV_ITEMS = [
   { href: "/dashboard/calendar", label: "Calendar", icon: CalendarIcon },
   { href: "/dashboard/production", label: "Production", icon: ProductionIcon },
   { href: "/dashboard/documents", label: "Documents", icon: DocumentsIcon },
-  { href: "/dashboard/messages", label: "Messages", icon: MessagesIcon },
   { href: "/dashboard/team", label: "Team", icon: TeamIcon },
 ];
 

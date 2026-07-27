@@ -11,7 +11,15 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
   });
 }
 
-if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+// PostHog sets analytics cookies/localStorage, which GDPR/ePrivacy treat as
+// non-essential — it only starts once the user has accepted via
+// CookieConsentBanner (see src/components/cookie-consent-banner.tsx), not
+// unconditionally on page load.
+let posthogEnabled = false;
+
+export function enablePostHog() {
+  if (posthogEnabled || !process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
+  posthogEnabled = true;
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
     // We send pageviews manually below (initial + via onRouterTransitionStart)
@@ -22,8 +30,15 @@ if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
   posthog.capture("$pageview");
 }
 
+if (
+  typeof window !== "undefined" &&
+  window.localStorage.getItem("cookie_consent") === "accepted"
+) {
+  enablePostHog();
+}
+
 export function onRouterTransitionStart(url: string) {
-  if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+  if (posthogEnabled) {
     posthog.capture("$pageview", { $current_url: url });
   }
 }

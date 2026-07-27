@@ -3,7 +3,6 @@ import { requireWorkspace } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody } from "@/components/ui/card";
 import { SupplierForm } from "@/components/suppliers/supplier-form";
-import { WhatsappConnect } from "@/components/suppliers/whatsapp-connect";
 import { DeleteButton } from "@/components/ui/delete-button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import {
 } from "@/lib/actions/suppliers";
 import { DocumentsSection } from "@/components/documents/documents-section";
 import { withSignedUrls } from "@/lib/documents";
-import { WhatsappThread } from "@/components/suppliers/whatsapp-thread";
 
 export default async function SupplierDetailPage({
   params,
@@ -40,12 +38,6 @@ export default async function SupplierDetailPage({
     .eq("supplier_id", supplier.id)
     .order("created_at", { ascending: false });
   const documentsWithUrls = await withSignedUrls(supabase, documents ?? []);
-
-  const { data: whatsappMessages } = await supabase
-    .from("whatsapp_messages")
-    .select("*")
-    .eq("supplier_id", supplier.id)
-    .order("timestamp", { ascending: true });
 
   const updateSupplierWithId = updateSupplier.bind(null, supplier.id);
   const deleteSupplierWithId = deleteSupplier.bind(null, supplier.id);
@@ -76,32 +68,6 @@ export default async function SupplierDetailPage({
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>WhatsApp</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <WhatsappConnect
-                supplierId={supplier.id}
-                whatsappNumber={supplier.whatsapp_number}
-                connected={supplier.whatsapp_connected}
-              />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>WhatsApp Messages</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <WhatsappThread
-                supplierId={supplier.id}
-                connected={supplier.whatsapp_connected}
-                messages={whatsappMessages ?? []}
-              />
-            </CardBody>
-          </Card>
-
-          <Card>
-            <CardHeader>
               <CardTitle>Communication Log</CardTitle>
             </CardHeader>
             <CardBody>
@@ -113,7 +79,6 @@ export default async function SupplierDetailPage({
                   <Field label="Source" htmlFor="source">
                     <Select id="source" name="source" defaultValue="email">
                       <option value="email">Email</option>
-                      <option value="whatsapp">WhatsApp</option>
                       <option value="call">Call</option>
                       <option value="other">Other</option>
                     </Select>

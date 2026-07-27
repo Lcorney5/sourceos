@@ -1,6 +1,12 @@
 # SouceOS — Handoff
 
-Last updated: 2026-07-24
+Last updated: 2026-07-26
+
+**⚠️ Stripe checkout is currently broken in production** (live/test mode
+mismatch — see [current-state.md](./current-state.md) → "Do this first")
+before sending anyone to the pricing page. The "fails open to free access"
+half of this is already fixed; checkout itself still doesn't work until the
+key/price-ID mismatch is resolved.
 
 **Renamed from "SourceOS" to "SouceOS" on 2026-07-24** — see
 [current-state.md](./current-state.md) for why (short version: the real

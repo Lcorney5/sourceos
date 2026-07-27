@@ -7,6 +7,7 @@ import { POStageSelect } from "@/components/purchase-orders/po-stage-select";
 import { StageSteps } from "@/components/purchase-orders/stage-steps";
 import { OverdueBadge } from "@/components/ui/stamp-badge";
 import { isPurchaseOrderOverdue, poRef } from "@/lib/purchase-orders";
+import { DeletePOButton } from "@/components/purchase-orders/delete-po-button";
 import Link from "next/link";
 
 export default async function PurchaseOrdersPage() {
@@ -46,6 +47,7 @@ export default async function PurchaseOrdersPage() {
               <Th>Deposit</Th>
               <Th>Balance</Th>
               <Th>Status</Th>
+              <Th></Th>
             </tr>
           </Thead>
           <tbody>
@@ -77,6 +79,9 @@ export default async function PurchaseOrdersPage() {
                       <OverdueBadge />
                     </div>
                   )}
+                </Td>
+                <Td>
+                  <DeletePOButton poId={po.id} />
                 </Td>
               </Tr>
             ))}

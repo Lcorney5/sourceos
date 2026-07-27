@@ -156,3 +156,228 @@
     search results dominated by sourcing agencies rather than actual brand
     founders). All templates/leads saved to `growth-outreach-templates.md` in
     the outside-repo HANDOFF folder.
+26. **Waitlist landing page replaced with a live signup/pricing page** — the
+    homepage said "Coming Soon" / "Join Waitlist" even though signup and
+    login both actually worked, which would contradict what cold-call
+    outreach promises on the phone. Removed the waitlist form and badge;
+    header/hero now link to `/signup` directly, and each pricing tier card
+    links to `/signup?plan=starter|growth|agency`.
+27. **Pricing tiers now wire straight into Stripe Checkout** — the plan
+    picked on the homepage now carries through the whole signup chain
+    (`/signup?plan=X` → email confirmation or Google OAuth →
+    `/auth/callback?plan=X` → `/onboarding?plan=X`) and, once the user
+    creates their workspace, automatically calls `createCheckoutSession`
+    and redirects to Stripe instead of the dashboard. No plan selected still
+    falls through to the dashboard exactly as before. New file:
+    `src/lib/plans.ts` — split `PlanKey`/`PLAN_KEYS` out of `src/lib/stripe.ts`
+    (which is `"server-only"`) so the client-side onboarding form can
+    validate a plan key without pulling the Stripe SDK into the browser
+    bundle; a first attempt importing directly from `lib/stripe.ts` failed
+    the production build for exactly this reason.
+28. **Fixed a `redirect()`-swallowing bug before it shipped** — the new
+    onboarding flow needed to call the checkout-redirecting server action
+    from a client component and still show a friendly error if it *actually*
+    failed (e.g. bad Stripe config). A naive `try { await
+    createCheckoutSession(plan) } catch { ... }` would silently swallow
+    Next's `NEXT_REDIRECT` throw on the success path, since `redirect()`
+    works by throwing. Fixed with an `isNextRedirectError` check (matches on
+    `.digest.startsWith("NEXT_REDIRECT")`) that re-throws the redirect and
+    only treats genuine errors as errors — see
+    `src/app/onboarding/create-workspace-form.tsx`.
+29. **Confirmation-email domain bug found and fixed** — Supabase Auth's own
+    **Site URL** setting (Authentication → URL Configuration, separate from
+    anything in the codebase) was still pointed at `sourceos.com` — the
+    wrong, unrelated third-party domain from the original typo saga — so
+    confirmation links sent users there instead of `souceos.com`. Fixed by
+    updating Supabase's Site URL and Redirect URLs allowlist to
+    `https://www.souceos.com`.
+30. **Resend SMTP actually finished and verified this session** (previous
+    handoffs left this "in progress"). Found along the way: a Resend account
+    already existed with `souceos.com`'s exact DNS-verification records
+    (MX/SPF/DKIM/DMARC) already live in DNS — but the *domain entry in
+    Resend itself* had been created under the typo'd `sourceos.com`, so it
+    was never actually verified. Deleted/re-added the domain correctly as
+    `souceos.com` in Resend; its freshly-generated DKIM key didn't match the
+    stale DKIM TXT record already in DNS (that record was generated for the
+    wrong domain-entry instance), so the `resend._domainkey` TXT record
+    needed updating to the new value before verification passed. Also hit
+    two *separate* rate limits while testing, both fixed: (a) Supabase's
+    built-in mailer's own hard limit (pre-existing known issue, motivated
+    this whole effort), and (b) a **second**, independently-configurable
+    "rate limit for sending emails" under Authentication → Rate Limits that
+    still applies even with custom SMTP configured — was at 2/hour, raised
+    to 3000. (One false lead during debugging: Resend rejects `example.com`
+    as a recipient outright, "please use our testing email address instead
+    of domains like example.com" — not a config bug, just an invalid test
+    address; a real address confirmed the whole chain works, HTTP 200 with
+    `confirmation_sent_at` populated.)
+31. **Three product-preview visuals added to the homepage** — the page had
+    no visual proof the product actually exists. Added static mockups
+    (`src/components/landing/{product,samples,po}-preview.tsx`) reusing the
+    *real* dashboard components (`Table`/`Th`/`Td`, `QuoteStatusBadge`,
+    `SampleStatusBadge`, `StageSteps`, `OverdueBadge`) with fictional but
+    realistic example data, so they're visually identical to the actual app
+    rather than separate mockup art — a Quotes comparison in the hero, and
+    Samples + Purchase Orders (with a live "PAST DUE" flag on one row) in a
+    new "See It In Action" section, each one paired with the matching card
+    in "The Problem" above it.
+32. **Favicon and OG image added** — neither existed before. New
+    `src/app/icon.tsx` and `src/app/opengraph-image.tsx`, both generated
+    in-brand via `next/og`'s `ImageResponse` (no external image tooling
+    needed) using the same paper/ink/rust palette as the rest of the site.
+    **Found and fixed the same class of bug as the `/api/*` and
+    `robots.txt`/`sitemap.xml` middleware issues from earlier sessions**:
+    `src/proxy.ts`'s matcher regex excludes static file extensions but
+    `/icon` and `/opengraph-image` have no extension in their URL, so both
+    were silently redirecting to `/login` until explicitly excluded. Worth
+    remembering as a recurring pattern: any new file-convention route under
+    `src/app/` needs to be checked against this matcher.
+33. **Stripe live/test mode mismatch found — NOT YET RESOLVED, see
+    [known-issues.md](./known-issues.md).** After everything above shipped,
+    the user reported pricing-page checkout buttons doing nothing, and a
+    fresh signup getting full dashboard access (added a supplier) without
+    ever paying. Root cause: Vercel Production's `STRIPE_SECRET_KEY` is a
+    **live-mode** key (`sk_live_...`), but the three
+    `NEXT_PUBLIC_STRIPE_PRICE_*` env vars are test-mode price IDs — a live
+    key can't see test-mode prices, so `checkout.sessions.create()` fails
+    every time. **This also surfaced a second, independent bug**: when
+    checkout creation throws a genuine (non-redirect) error,
+    `create-workspace-form.tsx` currently falls back to
+    `router.push("/dashboard")` instead of blocking the user — meaning any
+    Stripe misconfiguration silently grants full free access. User was mid-
+    decision on live vs. test mode when this handoff was written; the
+    dashboard-fallback bug is flagged to fix regardless of which mode is
+    chosen. **Do not consider checkout "done" until this is resolved.**
+34. **Customer acquisition: cold-call list built (no app code)** — 102
+    companies compiled with real, verified phone numbers across three
+    categories: physical-product businesses with their own house brand
+    (sourced via Google Maps + manual brand verification, e.g. Huntington
+    Beach surf shops), freight-forwarder/customs-broker trade-association
+    directories (Michigan, Houston, North Texas — chosen as an adjacent-B2B
+    channel since every one of their clients already imports from overseas
+    manufacturers), and direct product importers found via the Specialty
+    Food Association's member directory (the strongest direct-ICP match,
+    e.g. Maurice Pincoffs Co., Amtrade Inc.). Deliberately excluded any
+    number sourced only from data-broker/scraper sites (ZoomInfo, Apollo,
+    Prospeo, Seamless.AI) rather than the company's own listing or an
+    official directory. Saved as `SourceOS_Cold_Call_List.csv`/`.xlsx` on
+    the Desktop (first attempt saved to the wrong, OneDrive-shadowed
+    `C:\Users\17703\Desktop` instead of the real synced
+    `C:\Users\17703\OneDrive\Desktop` — see
+    [known-issues.md](./known-issues.md)) and as a filterable/searchable
+    interactive artifact (click-to-call, per-row status tracking saved to
+    the browser, plus a second tab with a full cold-call script: direct
+    pitch for house-brand/importer leads vs. a no-pressure referral ask for
+    brokers/forwarders, objection-handling table, voicemail script).
+35. **Privacy Policy/Terms compliance overhaul + a real cookie-consent gate
+    added.** Audited the actual codebase first (no ad pixels/data brokers
+    anywhere; nothing is genuinely public UGC — samples/documents/directory
+    are all workspace-scoped; no custom marketing-email code exists, only
+    Supabase Auth's confirmation email over the Resend SMTP relay; a
+    self-serve Stripe Customer Portal already exists for cancellation; no
+    self-serve account deletion/export exists despite the old policy
+    claiming "any time" self-serve). Rewrote `src/app/privacy/page.tsx`
+    (14 sections) to fix that overpromise (now "contact us, we'll act on it
+    within a reasonable time"), add a dedicated Cookies section, a
+    California Privacy Rights (CCPA/CPRA) section with the actual categories
+    collected and a 45-day response commitment, a European/UK (GDPR) section
+    with legal bases and a 30-day response commitment, and a Marketing
+    Communications section committing to CAN-SPAM-compliant unsubscribe
+    handling for any future promotional email (none currently sent). Added a
+    matching **User Content** section (with a DMCA-style takedown process)
+    to `src/app/terms/page.tsx` and strengthened the Subscriptions & Billing
+    section (explicit pre-purchase Stripe Checkout disclosure, portal-based
+    cancellation, a 30+-day free-trial reminder commitment) — pushed
+    Intellectual Property through Contact Us down one section number each
+    (now 7–15) to make room. Also built and wired in a real
+    `CookieConsentBanner` (`src/components/cookie-consent-banner.tsx`) since
+    PostHog was previously initializing unconditionally in
+    `src/instrumentation-client.ts` on every page load — a real GDPR/
+    ePrivacy gap for non-essential analytics cookies. PostHog now only
+    initializes after the user clicks Accept (choice persisted in
+    `localStorage['cookie_consent']`); Sentry still runs unconditionally
+    (treated as strictly-necessary/security, not tracking). Verified in the
+    dev server: both pages render with correct section numbering, Accept
+    correctly sets `cookie_consent` with no console errors, `tsc --noEmit`
+    clean. **Two placeholders still remain** (legal entity name,
+    governing-law state/city) plus a **new one added**: business mailing
+    address (Privacy Policy §14) — needed for CAN-SPAM once any promotional
+    email is ever sent, not urgent today since none is. **Not built this
+    session, flagged instead of silently attempted**: actual self-serve
+    account/data deletion and export — a real product feature, not just a
+    text change, and more involved than this pass's scope.
+36. **Removed the WhatsApp Business messaging feature entirely** (the user
+    asked to drop the WhatsApp/WhatsApp Messages cards that appeared on the
+    supplier detail page after creating a supplier, then to remove the rest
+    once it was clear WhatsApp Connect was the *only* way a supplier ever
+    became "connected," orphaning the rest of the feature). Deleted
+    `src/components/suppliers/whatsapp-connect.tsx`,
+    `whatsapp-thread.tsx`, `src/lib/actions/whatsapp.ts`, `src/lib/twilio.ts`,
+    the `/api/twilio/whatsapp` webhook route, and the whole
+    `/dashboard/messages` page; removed `setWhatsappConnection` from
+    `src/lib/actions/suppliers.ts`, the "Messages" sidebar-nav entry and
+    home-page quick link, and the now-empty "WhatsApp Connections" section
+    on `/dashboard/settings` (replaced with a placeholder card so the
+    persistent sidebar-footer link doesn't 404). Also corrected
+    `/privacy` and `/terms` — both still listed Twilio/WhatsApp as an active
+    subprocessor/integration, which would have been the exact "policy
+    overpromises a feature that isn't real" problem fixed in #35, just in
+    the other direction. `whatsapp_number`/`whatsapp_connected` columns and
+    the `whatsapp_messages` table are untouched in the database — nothing
+    reads or writes them anymore, but no migration was run to drop them.
+    Twilio itself is unaffected as a *future* phone-auth SMS provider (that
+    goes through Supabase's own Phone provider config, not this app's
+    Twilio SDK usage — see changelog #19).
+37. **Found and fixed a real, previously-undiagnosed reason "Save Changes"
+    on the supplier page could silently do nothing** — Next.js 16's
+    Server Actions are same-origin-only by default (the request's `Origin`
+    header must match `Host`, a CSRF protection), and this app is reachable
+    on three different hostnames (`sourceos-gamma.vercel.app`,
+    `www.souceos.com`, and the still-SSL-pending bare `souceos.com`), none
+    of which were in `next.config.ts`'s `serverActions.allowedOrigins`. Any
+    request landing on a hostname Next didn't recognize as safe would have
+    its Server Action rejected outright, with no error surfaced to the
+    `updateSupplier` action's try/catch since the request never reaches
+    application code at all. Added all three hostnames to
+    `allowedOrigins` in `next.config.ts`. **Not fully confirmed as root
+    cause** — verifying required a real login, which this assistant doesn't
+    do (see known-issues.md's standing rule) — so if saving still fails
+    after this, the next diagnostic step is checking the browser console/
+    network tab for the actual error on submit.
+
+Note: item 38 below happened earlier in this same session, before 35–37 —
+listed out of strict order since it wasn't logged at the time.
+
+38. **Checkout-failure fallback that silently granted free access — fixed**
+    (see [known-issues.md](./known-issues.md) for the full before/after).
+    `src/app/onboarding/create-workspace-form.tsx` no longer redirects to
+    `/dashboard` when `createCheckoutSession` throws a genuine error; it now
+    shows a "Retry Checkout" view instead, since the workspace row already
+    exists by that point and re-running `create_workspace` would just error.
+39. **Per-row Delete added to the Suppliers, Samples, and Purchase Orders
+    list pages** — delete already existed on each entity's detail page (and
+    Quotes already had a per-row delete on its list), but Suppliers/Samples/
+    POs required opening a record first. Added
+    `DeleteSupplierButton`/`DeleteSampleButton`/`DeletePOButton` (client
+    components, `useTransition` + `confirm()`, mirroring the existing
+    `DeleteQuoteButton` pattern exactly) reusing the same `deleteSupplier`/
+    `deleteSample`/`deletePurchaseOrder` server actions already used by the
+    detail pages — no new backend logic. `tsc`/`eslint` clean; verified the
+    route still compiles and correctly redirects to `/login` when logged
+    out (list pages require auth, so the populated table itself needs a
+    real login to see — same standing limitation as prior sessions).
+40. **Missed WhatsApp remnant on the Suppliers list, removed.** The #36
+    cleanup deleted the connect/messaging feature but missed a "WhatsApp"
+    column on the Suppliers list table (`supplier-directory.tsx`) showing
+    `supplier.whatsapp_number` — with the connect flow gone, that field can
+    never be set again, so the column would only ever show "—". User caught
+    it visually and flagged it; removed the column entirely.
+41. **Removed the last WhatsApp trace**: the "WhatsApp" option in the
+    Communication Log's "Source" dropdown on the supplier detail page
+    (`suppliers/[id]/page.tsx`). Existing log entries already tagged
+    `whatsapp` still render fine (the log just displays whatever string is
+    stored); only the option for logging *new* entries that way is gone.
+    Remaining `whatsapp` references in the codebase are now just the
+    untouched DB columns/types (`database.types.ts`) and generic marketing
+    copy on the landing page describing the problem SouceOS solves — no
+    UI or feature surface left.

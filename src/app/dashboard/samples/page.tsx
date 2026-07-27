@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { Table, Thead, Th, Tr, Td, EmptyState } from "@/components/ui/table";
 import { SampleStatusSelect } from "@/components/samples/sample-status-select";
+import { DeleteSampleButton } from "@/components/samples/delete-sample-button";
 import Link from "next/link";
 
 export default async function SamplesPage({
@@ -45,6 +46,7 @@ export default async function SamplesPage({
               <Th>Rev.</Th>
               <Th>Status</Th>
               <Th>Updated</Th>
+              <Th></Th>
             </tr>
           </Thead>
           <tbody>
@@ -61,6 +63,9 @@ export default async function SamplesPage({
                   <SampleStatusSelect sampleId={sample.id} status={sample.status} />
                 </Td>
                 <Td className="font-mono">{new Date(sample.date_updated).toLocaleDateString()}</Td>
+                <Td>
+                  <DeleteSampleButton sampleId={sample.id} />
+                </Td>
               </Tr>
             ))}
           </tbody>

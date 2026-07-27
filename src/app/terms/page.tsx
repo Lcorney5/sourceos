@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "The terms that govern your use of SouceOS.",
 };
 
-const LAST_UPDATED = "July 23, 2026";
+const LAST_UPDATED = "July 26, 2026";
 
 export default function TermsPage() {
   return (
@@ -72,17 +72,21 @@ export default function TermsPage() {
             </h2>
             <p className="mb-3">
               SouceOS is offered on paid monthly subscription plans (currently Starter,
-              Growth, and Agency). By subscribing, you authorize us (via Stripe) to charge your
-              payment method on a recurring basis until you cancel.
+              Growth, and Agency). Before you subscribe, Stripe Checkout displays the plan,
+              price, and billing frequency for your confirmation; by completing that checkout,
+              you authorize us (via Stripe) to charge your payment method on a recurring basis
+              until you cancel.
             </p>
             <ul className="ml-5 list-disc">
               <li>
                 <strong>Auto-renewal.</strong> Subscriptions renew automatically each billing
-                period unless canceled before the renewal date.
+                period, at the then-current price, unless canceled before the renewal date.
               </li>
               <li>
-                <strong>Cancellation.</strong> You may cancel at any time from your account
-                settings; cancellation takes effect at the end of the current billing period.
+                <strong>Cancellation.</strong> You may cancel at any time, self-serve, from the
+                billing portal linked in your account settings (Stripe&apos;s Customer Portal);
+                cancellation takes effect at the end of the current billing period and we
+                won&apos;t charge you again after that.
               </li>
               <li>
                 <strong>Refunds.</strong> Except where required by law, payments are
@@ -94,7 +98,10 @@ export default function TermsPage() {
               </li>
               <li>
                 <strong>Free trials</strong> (if offered) convert to a paid subscription
-                automatically at the end of the trial unless you cancel before it ends.
+                automatically at the end of the trial unless you cancel before it ends. If we
+                ever offer a free trial of 30 days or longer, we&apos;ll send a reminder email
+                before it converts to a paid subscription, consistent with applicable
+                auto-renewal laws.
               </li>
             </ul>
           </section>
@@ -108,8 +115,7 @@ export default function TermsPage() {
               <li>Use the Service for any unlawful purpose or in violation of any applicable law;</li>
               <li>Attempt to gain unauthorized access to other workspaces, accounts, or systems;</li>
               <li>Interfere with or disrupt the integrity or performance of the Service;</li>
-              <li>Reverse-engineer, decompile, or attempt to extract the source code of the Service, except as permitted by law;</li>
-              <li>Use the Service to send unsolicited bulk messages (including via connected WhatsApp integrations) in violation of Twilio&apos;s or WhatsApp&apos;s policies; or</li>
+              <li>Reverse-engineer, decompile, or attempt to extract the source code of the Service, except as permitted by law; or</li>
               <li>Resell or provide the Service to third parties outside of the multi-client workspace functionality we provide for Agency plans.</li>
             </ul>
           </section>
@@ -134,7 +140,36 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              6. Intellectual Property
+              6. User Content
+            </h2>
+            <p className="mb-3">
+              &ldquo;User Content&rdquo; means anything you or your team upload, connect, or
+              enter into the Service beyond structured business records — for example sample
+              photos and uploaded documents. User Content is never
+              made public or shown outside your workspace (or, for Agency plans, the client
+              workspaces your own team can access) — it is not a public feed, forum, or review
+              system.
+            </p>
+            <p className="mb-3">
+              You&apos;re responsible for User Content you or your team submit, including having
+              the necessary rights, licenses, and consents to store and share it through the
+              Service. You agree not to upload content that infringes someone else&apos;s
+              intellectual property rights or violates applicable law.
+            </p>
+            <p>
+              If you believe User Content stored by another SouceOS customer infringes your
+              copyright, send a takedown notice to the email in Section 15 with: a description
+              of the copyrighted work, the material you believe infringes it and its location,
+              your contact information, and a statement made in good faith under penalty of
+              perjury that you&apos;re the rights holder or authorized to act on their behalf.
+              We may remove or disable access to reported content and, for repeat infringement,
+              terminate the responsible account.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
+              7. Intellectual Property
             </h2>
             <p>
               SouceOS and its underlying software, design, and branding are owned by us and
@@ -147,11 +182,11 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              7. Third-Party Services
+              8. Third-Party Services
             </h2>
             <p>
-              The Service integrates with third-party providers (including Stripe, Twilio/
-              WhatsApp, and Google Sign-In). Your use of those integrations is also subject to
+              The Service integrates with third-party providers (including Stripe and Google
+              Sign-In). Your use of those integrations is also subject to
               those providers&apos; own terms, and we&apos;re not responsible for their acts,
               omissions, or availability.
             </p>
@@ -159,7 +194,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              8. Disclaimer of Warranties
+              9. Disclaimer of Warranties
             </h2>
             <p className="uppercase">
               The service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;
@@ -171,7 +206,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              9. Limitation of Liability
+              10. Limitation of Liability
             </h2>
             <p className="uppercase">
               To the maximum extent permitted by law, SouceOS will not be liable for any
@@ -185,7 +220,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              10. Indemnification
+              11. Indemnification
             </h2>
             <p>
               You agree to indemnify and hold us harmless from any claims, damages, or expenses
@@ -195,7 +230,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              11. Termination
+              12. Termination
             </h2>
             <p>
               You may stop using the Service and cancel your subscription at any time. We may
@@ -208,7 +243,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              12. Governing Law
+              13. Governing Law
             </h2>
             <p>
               These Terms are governed by the laws of{" "}
@@ -220,7 +255,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              13. Changes to These Terms
+              14. Changes to These Terms
             </h2>
             <p>
               We may update these Terms from time to time. If we make material changes,
@@ -232,7 +267,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-              14. Contact Us
+              15. Contact Us
             </h2>
             <p>
               Questions about these Terms? Contact us at{" "}

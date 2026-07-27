@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/form";
 import { Table, Thead, Th, Tr, Td, EmptyState } from "@/components/ui/table";
 import { SearchIcon, PinIcon, MailIcon, ExternalLinkIcon } from "@/components/ui/icons";
+import { DeleteSupplierButton } from "@/components/suppliers/delete-supplier-button";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Supplier = Database["public"]["Tables"]["suppliers"]["Row"];
@@ -46,7 +47,7 @@ export function SupplierDirectory({ suppliers }: { suppliers: Supplier[] }) {
               <Th>Location</Th>
               <Th>Email</Th>
               <Th>Phone</Th>
-              <Th>WhatsApp</Th>
+              <Th></Th>
               <Th></Th>
             </tr>
           </Thead>
@@ -75,7 +76,6 @@ export function SupplierDirectory({ suppliers }: { suppliers: Supplier[] }) {
                   )}
                 </Td>
                 <Td className="font-mono">{supplier.contact_phone ?? "—"}</Td>
-                <Td className="font-mono">{supplier.whatsapp_number ?? "—"}</Td>
                 <Td>
                   <Link
                     href={`/dashboard/suppliers/${supplier.id}`}
@@ -84,6 +84,9 @@ export function SupplierDirectory({ suppliers }: { suppliers: Supplier[] }) {
                   >
                     <ExternalLinkIcon size={14} />
                   </Link>
+                </Td>
+                <Td>
+                  <DeleteSupplierButton supplierId={supplier.id} name={supplier.name} />
                 </Td>
               </Tr>
             ))}

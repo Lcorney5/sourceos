@@ -31,6 +31,27 @@ export function CreateWorkspaceForm({ plan }: { plan?: string }) {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // Once the workspace exists but checkout hasn't succeeded yet, re-running
+  // create_workspace would fail ("User already belongs to a workspace") — so
+  // instead of re-showing the workspace-name form, we switch to a retry-only
+  // view that just re-attempts checkout for the same workspace.
+  const [awaitingCheckout, setAwaitingCheckout] = useState(false);
+
+  async function attemptCheckout(planKey: PlanKey) {
+    try {
+      await createCheckoutSession(planKey);
+    } catch (checkoutError) {
+      if (isNextRedirectError(checkoutError)) throw checkoutError;
+
+      setPending(false);
+      setAwaitingCheckout(true);
+      setError(
+        checkoutError instanceof Error
+          ? checkoutError.message
+          : "Couldn't start checkout. Please try again, or contact support if this keeps happening."
+      );
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,26 +68,35 @@ export function CreateWorkspaceForm({ plan }: { plan?: string }) {
     }
 
     if (isPlanKey(plan)) {
-      try {
-        await createCheckoutSession(plan);
-      } catch (checkoutError) {
-        if (isNextRedirectError(checkoutError)) throw checkoutError;
-
-        setPending(false);
-        setError(
-          checkoutError instanceof Error
-            ? checkoutError.message
-            : "Couldn't start checkout — you can pick a plan from Billing instead."
-        );
-        router.push("/dashboard");
-        router.refresh();
-      }
+      await attemptCheckout(plan);
       return;
     }
 
     setPending(false);
     router.push("/dashboard");
     router.refresh();
+  }
+
+  async function handleRetry() {
+    if (!isPlanKey(plan)) return;
+    setError(null);
+    setPending(true);
+    await attemptCheckout(plan);
+  }
+
+  if (awaitingCheckout) {
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="text-sm">
+          Your workspace is set up, but we couldn&apos;t start checkout for your
+          subscription, so it isn&apos;t active yet.
+        </p>
+        {error && <p className="font-mono text-xs text-rust">{error}</p>}
+        <Button type="button" disabled={pending} onClick={handleRetry} className="w-full">
+          {pending ? "Starting checkout..." : "Retry Checkout"}
+        </Button>
+      </div>
+    );
   }
 
   return (

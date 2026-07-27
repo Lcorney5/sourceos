@@ -2,8 +2,28 @@
 
 *(part of the [handoff folder](./README.md))*
 
+## ⚠️ Do this first
+
+**Stripe checkout is currently broken in production** — see
+[known-issues.md](./known-issues.md) and [next-steps.md](./next-steps.md)
+item 0. The "fails open to free access" half of this is now fixed (checkout
+errors show a Retry Checkout view instead of granting dashboard access), but
+checkout itself still doesn't work due to the live/test key mismatch. Don't
+send cold-call traffic to the pricing page until that's resolved.
+
 ## Live and working
 
+- **Landing page rebuilt** — no more "Coming Soon"/waitlist; real
+  "Get Started" CTAs, pricing tiers link into signup, three product-preview
+  visuals (Quotes/Samples/Purchase Orders, reusing real dashboard
+  components with fictional example data), a real favicon and OG image.
+  See [changelog.md](./changelog.md) #26-32.
+- **Resend SMTP fully working** — confirmation emails send via Resend on
+  the verified `souceos.com` domain (not Supabase's rate-limited default
+  mailer). Confirmed with a real address, HTTP 200 + `confirmation_sent_at`
+  populated. See [changelog.md](./changelog.md) #29-30.
+- **Confirmation-email links now point to the right domain** — Supabase
+  Auth's Site URL setting was still on the wrong `sourceos.com`; fixed.
 - Production: https://sourceos-gamma.vercel.app **and** https://www.souceos.com
   (custom domain — note: **the real domain is `souceos.com`, missing the
   "r"**, not `sourceos.com`; see "The domain typo" below). Bare `souceos.com`
@@ -12,7 +32,11 @@
 - Repo: https://github.com/Lcorney5/sourceos (branch `main`, auto-deploys on push)
 - Supabase project `hwwfvzfhfsvdtiugqzwn` — schema migrated through 0009 (see
   [architecture.md](./architecture.md))
-- Stripe: **test mode**, 3 prices ($15/$60/$130 monthly), webhook verified working
+- Stripe: **broken — live/test mode mismatch, see "Do this first" above.**
+  Production's secret key is live-mode but the 3 configured prices
+  ($15/$60/$130 monthly) are test-mode IDs, so checkout fails every time.
+  Webhook itself was verified working in an earlier session, but that's
+  moot until the mode mismatch is fixed.
 - Full signup → onboarding → workspace creation → dashboard flow verified working
 - **Google OAuth sign-in** — now enabled and confirmed working (was returning
   a 400 "provider not enabled" error; fixed by creating a Google Cloud OAuth
@@ -20,8 +44,17 @@
   code changes needed)
 - **Legal pages** — Privacy Policy (`/privacy`) and Terms of Service (`/terms`)
   now exist, linked from the homepage footer and a consent line on `/signup`.
-  **Two placeholders still need filling in**: legal entity name and
-  governing-law state/city (both marked `[...]` in the page text) — not a
+  Rewritten this session with dedicated CCPA/CPRA, GDPR, Cookies, Marketing
+  Communications (CAN-SPAM), and User Content (DMCA) sections — see
+  [changelog.md](./changelog.md) #35 for the full detail, including what was
+  audited in the actual code (no data selling, no public UGC, no marketing
+  email infrastructure yet) versus what the old policy text was overpromising
+  (self-serve deletion/export, which isn't actually built — the policy now
+  says "contact us" instead). A real cookie-consent banner now gates PostHog
+  analytics behind an Accept click (`src/components/cookie-consent-banner.tsx`),
+  closing a real GDPR/ePrivacy gap. **Three placeholders still need filling
+  in**: legal entity name, governing-law state/city, and (new) a business
+  mailing address (both pages marked `[...]` in the page text) — not a
   blocker to launch, but should be done before relying on them, and an
   attorney should still review before scaling real payments.
 - **robots.txt / sitemap.xml / Open Graph metadata** — all added
@@ -105,14 +138,29 @@ brand name that doesn't match its own URL.
 
 ## Not yet configured
 
-- Twilio (WhatsApp Business API *and* the phone-auth SMS option) — still
-  unset, needs a paid Twilio account (see "Phone sign-in" above)
-- Stripe is in test mode only
+- Twilio for phone-auth SMS — still unset, needs a paid Twilio account (see
+  "Phone sign-in" above). The WhatsApp Business API integration was removed
+  entirely this session (see [changelog.md](./changelog.md) #36) rather than
+  left unconfigured — it's not coming back unless explicitly rebuilt.
+- Stripe live/test mode mismatch — see "Do this first" above and
+  [next-steps.md](./next-steps.md) item 0
 - Two placeholders in the legal docs (legal entity name, governing-law state)
   still need real values
+- LLC/business entity — discussed as general context this session, no
+  decision made, needs a real accountant/lawyer
 
-## Customer acquisition (new this session — no code, but concrete state)
+## Customer acquisition (concrete state, carried forward + new this session)
 
+- **Cold-call list built (new this session)**: 102 real companies with
+  verified phone numbers — physical-product house-brand shops (Google Maps
+  + manual brand verification), freight-forwarder/customs-broker trade
+  directories (Michigan, Houston, North Texas — adjacent-B2B referral
+  angle), and direct product importers via the Specialty Food Association's
+  directory (strongest direct-ICP fit). Saved as
+  `SourceOS_Cold_Call_List.csv`/`.xlsx` on the Desktop and as an interactive
+  artifact (click-to-call, status tracking, full call script). See
+  [changelog.md](./changelog.md) #34. **Not yet worked** — ready to start
+  calling once the Stripe mismatch above is fixed.
 - **Kickstarter**: 7 real, currently-active leads researched and ranked (see
   `growth-outreach-templates.md` in the outside-repo HANDOFF folder) — top 2
   recommended to back first are Nguyen Lam (BLOCHILD/Innocence Collection)
