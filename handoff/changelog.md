@@ -381,3 +381,28 @@ listed out of strict order since it wasn't logged at the time.
     untouched DB columns/types (`database.types.ts`) and generic marketing
     copy on the landing page describing the problem SouceOS solves — no
     UI or feature surface left.
+42. **Diagnosed the "Save Changes does nothing" report by watching a screen
+    recording of it** (frames extracted via the already-installed FFmpeg,
+    no login needed) — found that `SupplierForm` gave zero visual feedback
+    on submit either way, so a successful silent save and a fully broken
+    one would look pixel-identical. Converted it to a client component
+    using `useActionState` (`src/components/suppliers/supplier-form.tsx`):
+    the button now shows "Saving...", then either "Saved." or the actual
+    thrown error message. Used by both `/suppliers/new` (Create Supplier)
+    and `/suppliers/[id]` (Save Changes); preserves the `createSupplier`
+    redirect-on-success behavior via the same `isNextRedirectError` rethrow
+    pattern from the onboarding fix (#38). Root cause of the original
+    report is still not 100% confirmed — this makes the real outcome
+    visible either way instead of fixing a specific guessed cause.
+43. **Local dev/testing traffic was polluting production PostHog
+    analytics** — caught by the user reading PostHog's own "User Paths"
+    report and spotting a `localhost:3000/` entry node with real hits, from
+    this session's `next dev` testing (local and prod share the same
+    `NEXT_PUBLIC_POSTHOG_KEY`). Fixed in `src/instrumentation-client.ts`:
+    `enablePostHog()` now no-ops on `localhost`, `127.0.0.1`, or a
+    private-network IP (the "Network: http://192.168.x.x:3000" address
+    `next dev` prints), regardless of cookie consent. Verified in the dev
+    server: consent still stores correctly and the banner still hides, but
+    no request ever reaches PostHog's servers. Doesn't retroactively clean
+    already-recorded local sessions — those just age out of any date-range
+    report on their own.
