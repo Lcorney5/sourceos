@@ -17,8 +17,21 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
 // unconditionally on page load.
 let posthogEnabled = false;
 
+// Never send analytics from local dev/testing — matches localhost, 127.0.0.1,
+// and private-network IPs (e.g. the "Network: http://192.168.x.x:3000" address
+// `next dev` prints), all of which share the same POSTHOG key as production.
+function isLocalHost() {
+  const host = window.location.hostname;
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    /^192\.168\.\d{1,3}\.\d{1,3}$/.test(host) ||
+    /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)
+  );
+}
+
 export function enablePostHog() {
-  if (posthogEnabled || !process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
+  if (posthogEnabled || !process.env.NEXT_PUBLIC_POSTHOG_KEY || isLocalHost()) return;
   posthogEnabled = true;
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
